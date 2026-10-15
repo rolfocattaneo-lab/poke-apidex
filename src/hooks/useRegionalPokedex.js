@@ -30,7 +30,19 @@ export function useRegionalPokedex() {
     let active = true
 
     getRegionGames(region)
-      .then((data) => { if (active) { setRegionGames(data); setOptionsError('') } })
+      .then((data) => {
+        if (!active) return
+        setRegionGames(data)
+        setOptionsError('')
+        // Seleziona automaticamente la prima generazione e il primo gioco disponibili.
+        // L'ordine viene stabilito dai dati PokéAPI.
+        const firstGame = data[0]
+        setGeneration(firstGame?.generation || '')
+        setGame(firstGame?.name || '')
+        setEntries(null)
+        setEntriesError('')
+        setEntriesLoading(Boolean(firstGame))
+      })
       .catch(() => { if (active) setOptionsError('Non riesco a caricare i giochi di questa regione.') })
       .finally(() => { if (active) setOptionsLoading(false) })
 
@@ -69,11 +81,13 @@ export function useRegionalPokedex() {
   }
 
   function selectGeneration(value) {
+    // Quando la generazione cambia, proponi il primo gioco disponibile.
+    const firstGame = regionGames.find((item) => item.generation === value)
     setGeneration(value)
-    setGame('')
+    setGame(firstGame?.name || '')
     setEntries(null)
     setEntriesError('')
-    setEntriesLoading(false)
+    setEntriesLoading(Boolean(firstGame))
   }
 
   function selectGame(value) {

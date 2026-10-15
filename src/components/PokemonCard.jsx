@@ -89,7 +89,12 @@ export default function PokemonCard({ pokemon, list }) {
       </div>
       <div className="pokemon-card-body">
         <div className="pokemon-card-meta">
-          <span className="pokemon-number">#{String(pokemon.speciesId).padStart(4, '0')}</span>
+          <span className="pokemon-number" title="Numero nazionale">N. #{String(pokemon.speciesId).padStart(4, '0')}</span>
+          {pokemon.regionalNumber != null && (
+            <span className="pokemon-regional-number" title={'Numero nel Pokédex ' + pokemon.pokedexName}>
+              R. #{String(pokemon.regionalNumber).padStart(3, '0')}
+            </span>
+          )}
           {pokemon.category !== 'base' && (
             <span className={'form-badge form-badge-' + pokemon.category}>
               {categoryNames[pokemon.category]}

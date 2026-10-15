@@ -207,16 +207,18 @@ function App() {
 
         <main className="main-content">
           <div className="intro">
-            <span className="eyebrow intro-eyebrow">POKÉDEX • CATALOGO NAZIONALE</span>
+            <span className="eyebrow intro-eyebrow">POKÉDEX • {regional.region === 'national' ? 'NAZIONALE' : regionLabel(regional.region).toUpperCase()}</span>
             <h1>Ogni Pokémon.<br /><span>Una storia da scoprire.</span></h1>
-            <p>Esplora il Pokédex nazionale con Mega Evoluzioni, Gigamax, forme regionali e varianti estetiche. Ogni forma ha una scheda distinta, con il numero nazionale della specie.</p>
+            <p>{regional.region === 'national'
+              ? 'Esplora il Pokédex nazionale con Mega Evoluzioni, Gigamax, forme regionali e varianti estetiche.'
+              : 'Scegli generazione e gioco per vedere le specie del Pokédex regionale, con tutte le loro forme presenti in PokéAPI.'}</p>
           </div>
 
           <div className="section-toolbar">
             <div className="section-title">
               <span className="eyebrow">CATALOGO DA POKÉAPI</span>
               <h2>Il tuo Pokédex</h2>
-              <p className="catalog-count" role="status">{catalogLoading ? 'Caricamento del catalogo…' : catalogError ? 'Catalogo non disponibile' : matchingPokemon.length + ' forme Pokémon trovate'}</p>
+              <p className="catalog-count" role="status">{isLoading ? 'Caricamento del Pokédex…' : catalogError || regional.optionsError || regional.entriesError ? 'Pokédex non disponibile' : !regional.ready ? 'Seleziona generazione e gioco' : matchingPokemon.length + ' forme Pokémon trovate'}</p>
             </div>
             <div className="toolbar-actions">
               <button type="button" className="mobile-filter-button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}>
@@ -235,7 +237,21 @@ function App() {
               <button type="button" className="catalog-button" onClick={retryCatalog}>Riprova</button>
             </div>
           ) : catalogLoading ? (
-            <div className="catalog-feedback" role="status">Sto caricando il Pokédex nazionale da PokéAPI…</div>
+            <div className="catalog-feedback" role="status">Sto caricando il catalogo nazionale da PokéAPI…</div>
+          ) : regional.optionsError ? (
+            <div className="catalog-feedback" role="alert">
+              <p>{regional.optionsError}</p>
+              <button type="button" className="catalog-button" onClick={regional.retryOptions}>Riprova</button>
+            </div>
+          ) : regional.entriesError ? (
+            <div className="catalog-feedback" role="alert">
+              <p>{regional.entriesError}</p>
+              <button type="button" className="catalog-button" onClick={regional.retryEntries}>Riprova</button>
+            </div>
+          ) : regional.loading ? (
+            <div className="catalog-feedback" role="status">Sto caricando il Pokédex regionale da PokéAPI…</div>
+          ) : !regional.ready ? (
+            <div className="catalog-feedback">Seleziona generazione e gioco nel pannello dei filtri per aprire il Pokédex di {regionLabel(regional.region)}.</div>
           ) : visiblePokemon.length === 0 ? (
             <div className="catalog-feedback">Nessun Pokémon trovato. Prova un altro nome o numero.</div>
           ) : (
@@ -244,7 +260,7 @@ function App() {
             </div>
           )}
 
-          {!catalogLoading && !catalogError && visibleCount < matchingPokemon.length && (
+          {!isLoading && !catalogError && !regional.optionsError && !regional.entriesError && regional.ready && visibleCount < matchingPokemon.length && (
             <div className="load-more">
               <button type="button" className="catalog-button" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
                 Carica altri Pokémon ({Math.min(visibleCount, matchingPokemon.length)} di {matchingPokemon.length})
@@ -255,8 +271,8 @@ function App() {
           <div className="next-step">
             <span className="next-step-icon"><Icon name="arrow" size={20} /></span>
             <div>
-              <strong>Le forme Pokémon sono collegate.</strong>
-              <p>Le forme con dati di lotta propri e le varianti estetiche vengono recuperate dai rispettivi endpoint di PokéAPI. I Pokédex regionali arriveranno nella prossima fase.</p>
+              <strong>Pokédex nazionale e regionali.</strong>
+              <p>I Pokémon vengono ordinati secondo le voci del Pokédex associato al gioco. Sono incluse tutte le forme della specie disponibili in PokéAPI, <strong>non necessariamente ottenibili nel gioco selezionato</strong>.</p>
             </div>
           </div>
           <footer className="site-footer">Poke Apidex è un progetto indipendente e non ufficiale. Pokémon e relativi marchi appartengono ai rispettivi titolari.</footer>

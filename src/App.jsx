@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import PokemonCard from './components/PokemonCard.jsx'
 import { getNationalCatalog } from './lib/pokeapi.js'
+import { pokemonTypes, getPokemonIdsByTypes } from './lib/types.js'
 import { useRegionalPokedex } from './hooks/useRegionalPokedex.js'
 import { regionLabel, generationLabel, gameLabel } from './lib/regional.js'
 import './App.css'
@@ -32,6 +33,11 @@ function App() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [formFilter, setFormFilter] = useState('base')
+  const [selectedTypes, setSelectedTypes] = useState([])
+  const [typeIds, setTypeIds] = useState(null)
+  const [typesLoading, setTypesLoading] = useState(false)
+  const [typesError, setTypesError] = useState('')
+  const [typesRetry, setTypesRetry] = useState(0)
   const [catalog, setCatalog] = useState([])
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [catalogError, setCatalogError] = useState('')
@@ -71,6 +77,24 @@ function App() {
     }
   }, [catalogRetry])
 
+  useEffect(() => {
+    if (selectedTypes.length === 0) return undefined
+    let active = true
+
+    getPokemonIdsByTypes(selectedTypes)
+      .then((ids) => {
+        if (active) { setTypeIds(ids); setTypesError('') }
+      })
+      .catch(() => {
+        if (active) setTypesError('Impossibile applicare il filtro per tipo.')
+      })
+      .finally(() => {
+        if (active) setTypesLoading(false)
+      })
+
+    return () => { active = false }
+  }, [selectedTypes, typesRetry])
+
   const regionalCatalog = useMemo(() => {
     if (regional.region === 'national') return catalog
     if (!regional.ready || !regional.entries) return []
@@ -105,20 +129,54 @@ function App() {
       if (formFilter === 'alternative' && pokemon.category === 'base') return false
       if (!['all', 'base', 'alternative'].includes(formFilter) && pokemon.category !== formFilter) return false
 
+      if (selectedTypes.length > 0) {
+        if (!typeIds) return false
+        // Le forme estetiche prive di una risorsa Pokémon propria ereditano
+        // i tipi della specie principale; le altre usano i propri ID PokéAPI.
+        const pokemonId = pokemon.source === 'form' ? pokemon.speciesId : pokemon.id
+        if (!typeIds.has(pokemonId)) return false
+      }
+
       if (!query) return true
       if (numberQuery !== null) return pokemon.speciesId === numberQuery
       return words.every((word) => pokemon.name.includes(word))
     })
-  }, [regionalCatalog, search, formFilter])
+  }, [regionalCatalog, search, formFilter, selectedTypes, typeIds])
 
   const visiblePokemon = matchingPokemon.slice(0, visibleCount)
   const effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme
-  const isLoading = catalogLoading || regional.loading
+  const isLoading = catalogLoading || regional.loading || typesLoading
 
   function retryCatalog() {
     setCatalogError('')
     setCatalogLoading(true)
     setCatalogRetry((retry) => retry + 1)
+  }
+
+  function changeType(typeId) {
+    const next = selectedTypes.includes(typeId)
+      ? selectedTypes.filter((id) => id !== typeId)
+      : [...selectedTypes, typeId]
+
+    setSelectedTypes(next)
+    setTypeIds(null)
+    setTypesLoading(next.length > 0)
+    setTypesError('')
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  function clearTypes() {
+    setSelectedTypes([])
+    setTypeIds(null)
+    setTypesLoading(false)
+    setTypesError('')
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  function retryTypes() {
+    setTypesLoading(true)
+    setTypesError('')
+    setTypesRetry((retry) => retry + 1)
   }
 
   return (
@@ -187,8 +245,29 @@ function App() {
             <div className="input-with-icon"><Icon name="search" size={17} /><input id="name-search" type="search" autoComplete="off" value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(PAGE_SIZE) }} placeholder="Es. Pikachu o 25" disabled={catalogLoading} /></div>
           </div>
           <div className="filter-field">
-            <label htmlFor="type-select">Tipo</label>
-            <select id="type-select" disabled><option>Tutti i tipi</option></select>
+            <span className="filter-type-title">Tipo</span>
+            <details className="type-filter">
+              <summary>{selectedTypes.length ? selectedTypes.length + (selectedTypes.length === 1 ? ' tipo selezionato' : ' tipi selezionati') : 'Tutti i tipi'}</summary>
+              <div className="type-filter-controls">
+                <div className="type-filter-grid" role="group" aria-label="Filtra per uno o più tipi Pokémon">
+                  {pokemonTypes.map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      className={'type-filter-chip' + (selectedTypes.includes(id) ? ' type-filter-chip-selected' : '')}
+                      aria-pressed={selectedTypes.includes(id)}
+                      onClick={() => changeType(id)}
+                    >
+                      <span className={'type-filter-dot type-' + id} aria-hidden="true" />{label}
+                    </button>
+                  ))}
+                </div>
+                {selectedTypes.length > 0 && (
+                  <button type="button" className="clear-type-filter" onClick={clearTypes}>Deseleziona tutti i tipi</button>
+                )}
+                <p className="type-filter-note">Più tipi = almeno uno dei tipi selezionati (OR).</p>
+              </div>
+            </details>
           </div>
           <div className="filter-field">
             <label htmlFor="form-select">Categoria forma</label>
@@ -218,7 +297,7 @@ function App() {
             <div className="section-title">
               <span className="eyebrow">CATALOGO DA POKÉAPI</span>
               <h2>Il tuo Pokédex</h2>
-              <p className="catalog-count" role="status">{isLoading ? 'Caricamento del Pokédex…' : catalogError || regional.optionsError || regional.entriesError ? 'Pokédex non disponibile' : !regional.ready ? 'Seleziona generazione e gioco' : matchingPokemon.length + ' forme Pokémon trovate'}</p>
+              <p className="catalog-count" role="status">{isLoading ? 'Caricamento del Pokédex…' : catalogError || regional.optionsError || regional.entriesError || typesError ? 'Pokédex non disponibile' : !regional.ready ? 'Seleziona generazione e gioco' : matchingPokemon.length + ' forme Pokémon trovate'}</p>
             </div>
             <div className="toolbar-actions">
               <button type="button" className="mobile-filter-button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}>
@@ -250,6 +329,13 @@ function App() {
             </div>
           ) : regional.loading ? (
             <div className="catalog-feedback" role="status">Sto caricando il Pokédex regionale da PokéAPI…</div>
+          ) : typesError ? (
+            <div className="catalog-feedback" role="alert">
+              <p>{typesError}</p>
+              <button type="button" className="catalog-button" onClick={retryTypes}>Riprova</button>
+            </div>
+          ) : typesLoading ? (
+            <div className="catalog-feedback" role="status">Sto filtrando i Pokémon per tipo…</div>
           ) : !regional.ready ? (
             <div className="catalog-feedback">Seleziona generazione e gioco nel pannello dei filtri per aprire il Pokédex di {regionLabel(regional.region)}.</div>
           ) : visiblePokemon.length === 0 ? (
@@ -260,7 +346,7 @@ function App() {
             </div>
           )}
 
-          {!isLoading && !catalogError && !regional.optionsError && !regional.entriesError && regional.ready && visibleCount < matchingPokemon.length && (
+          {!isLoading && !catalogError && !regional.optionsError && !regional.entriesError && !typesError && regional.ready && visibleCount < matchingPokemon.length && (
             <div className="load-more">
               <button type="button" className="catalog-button" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
                 Carica altri Pokémon ({Math.min(visibleCount, matchingPokemon.length)} di {matchingPokemon.length})

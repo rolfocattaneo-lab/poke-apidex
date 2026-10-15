@@ -164,11 +164,15 @@ export function getPokemonEntryDetails(entry) {
 
   return getCachedDetails(formCache, 'pokemon-form', entry.id)
     .then(async (form) => {
-      // In genere il tipo è già nella forma; in caso contrario usiamo il Pokémon collegato.
-      if (form.types?.length) return form
+      // Le varianti soltanto estetiche non hanno statistiche autonome:
+      // ricaviamo i valori base dal Pokémon collegato, senza alterarne gli sprite.
       const pokemonId = getResourceId(form.pokemon?.url || '')
       if (!pokemonId) return form
       const parent = await getPokemonDetails(pokemonId)
-      return { ...form, types: parent.types }
+      return {
+        ...form,
+        types: form.types?.length ? form.types : parent.types,
+        stats: parent.stats,
+      }
     })
 }

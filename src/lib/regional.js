@@ -6,7 +6,8 @@ const requests = new Map()
 
 function fetchResource(resource) {
   if (!requests.has(resource)) {
-    const promise = fetch(`${API_BASE}/${resource}/`)
+    const url = resource.includes('?') ? `${API_BASE}/${resource}` : `${API_BASE}/${resource}/`
+    const promise = fetch(url)
       .then((response) => {
         if (!response.ok) throw new Error('Impossibile recuperare i dati regionali da PokéAPI.')
         return response.json()

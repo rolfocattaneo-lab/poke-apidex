@@ -29,6 +29,7 @@ function App() {
   const [view, setView] = useState(() => localStorage.getItem('poke-apidex-view') || 'grid')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [formFilter, setFormFilter] = useState('all')
   const [catalog, setCatalog] = useState([])
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [catalogError, setCatalogError] = useState('')
@@ -69,16 +70,21 @@ function App() {
 
   const matchingPokemon = useMemo(() => {
     const query = search.trim().toLowerCase()
-    if (!query) return catalog
+    const numberQuery = /^#?\d+$/.test(query)
+      ? Number(query.replace('#', ''))
+      : null
+    const words = query.replaceAll(' ', '-').split('-').filter(Boolean)
 
-    if (/^#?\d+$/.test(query)) {
-      const number = Number(query.replace('#', ''))
-      return catalog.filter((pokemon) => pokemon.id === number)
-    }
+    return catalog.filter((pokemon) => {
+      if (formFilter === 'base' && pokemon.category !== 'base') return false
+      if (formFilter === 'alternative' && pokemon.category === 'base') return false
+      if (!['all', 'base', 'alternative'].includes(formFilter) && pokemon.category !== formFilter) return false
 
-    const normalized = query.replaceAll(' ', '-')
-    return catalog.filter((pokemon) => pokemon.name.includes(normalized))
-  }, [catalog, search])
+      if (!query) return true
+      if (numberQuery !== null) return pokemon.speciesId === numberQuery
+      return words.every((word) => pokemon.name.includes(word))
+    })
+  }, [catalog, search, formFilter])
 
   const visiblePokemon = matchingPokemon.slice(0, visibleCount)
   const effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme
@@ -122,7 +128,7 @@ function App() {
             <div><span className="eyebrow">ESPLORA</span><h2>Filtri Pokédex</h2></div>
             <button type="button" className="filter-close" onClick={() => setFiltersOpen(false)} aria-label="Chiudi filtri"><Icon name="close" /></button>
           </div>
-          <p className="filter-hint">Il catalogo nazionale e la ricerca sono attivi. Aggiungeremo presto i filtri per tipo, regione e forma.</p>
+          <p className="filter-hint">Cerca un Pokémon per nome o numero e scegli se mostrare la forma base, le Mega Evoluzioni, le forme regionali o le altre varianti.</p>
           <div className="filter-field">
             <label htmlFor="dex-select">Pokédex</label>
             <select id="dex-select" disabled><option>Nazionale</option></select>
@@ -136,24 +142,32 @@ function App() {
             <select id="type-select" disabled><option>Tutti i tipi</option></select>
           </div>
           <div className="filter-field">
-            <label htmlFor="form-select">Forma</label>
-            <select id="form-select" disabled><option>Tutte le forme</option></select>
+            <label htmlFor="form-select">Categoria forma</label>
+            <select id="form-select" value={formFilter} onChange={(event) => { setFormFilter(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+              <option value="all">Tutte le forme</option>
+              <option value="base">Solo forme base</option>
+              <option value="alternative">Tutte le alternative</option>
+              <option value="regional">Forme regionali</option>
+              <option value="mega">Mega Evoluzioni</option>
+              <option value="gmax">Gigamax</option>
+              <option value="other">Altre forme</option>
+            </select>
           </div>
-          <div className="sidebar-note"><span className="note-dot" /> Dati Pokémon da PokéAPI. Le forme e i Pokédex regionali arriveranno nella prossima fase.</div>
+          <div className="sidebar-note"><span className="note-dot" /> Le forme alternative mantengono il numero nazionale della specie. Le varianti puramente estetiche potrebbero avere solo uno sprite.</div>
         </aside>
 
         <main className="main-content">
           <div className="intro">
             <span className="eyebrow intro-eyebrow">POKÉDEX • CATALOGO NAZIONALE</span>
             <h1>Ogni Pokémon.<br /><span>Una storia da scoprire.</span></h1>
-            <p>Esplora i Pokémon del Pokédex nazionale, cerca per nome o numero e scopri i loro tipi. Presto arriveranno le forme alternative e i Pokédex regionali.</p>
+            <p>Esplora il Pokédex nazionale con Mega Evoluzioni, Gigamax, forme regionali e varianti estetiche. Ogni forma ha una scheda distinta, con il numero nazionale della specie.</p>
           </div>
 
           <div className="section-toolbar">
             <div className="section-title">
               <span className="eyebrow">CATALOGO DA POKÉAPI</span>
               <h2>Il tuo Pokédex</h2>
-              <p className="catalog-count" role="status">{catalogLoading ? 'Caricamento del catalogo…' : catalogError ? 'Catalogo non disponibile' : matchingPokemon.length + ' Pokémon trovati'}</p>
+              <p className="catalog-count" role="status">{catalogLoading ? 'Caricamento del catalogo…' : catalogError ? 'Catalogo non disponibile' : matchingPokemon.length + ' forme Pokémon trovate'}</p>
             </div>
             <div className="toolbar-actions">
               <button type="button" className="mobile-filter-button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}>
@@ -177,7 +191,7 @@ function App() {
             <div className="catalog-feedback">Nessun Pokémon trovato. Prova un altro nome o numero.</div>
           ) : (
             <div className={'pokemon-grid' + (view === 'list' ? ' pokemon-grid-list' : '')}>
-              {visiblePokemon.map((pokemon) => <PokemonCard key={pokemon.id} pokemon={pokemon} list={view === 'list'} />)}
+              {visiblePokemon.map((pokemon) => <PokemonCard key={pokemon.key} pokemon={pokemon} list={view === 'list'} />)}
             </div>
           )}
 
@@ -192,8 +206,8 @@ function App() {
           <div className="next-step">
             <span className="next-step-icon"><Icon name="arrow" size={20} /></span>
             <div>
-              <strong>Il catalogo nazionale è collegato.</strong>
-              <p>Le schede e i tipi arrivano da PokéAPI. Nel prossimo passaggio aggiungeremo forme alternative, filtri e Pokédex regionali.</p>
+              <strong>Le forme Pokémon sono collegate.</strong>
+              <p>Le forme con dati di lotta propri e le varianti estetiche vengono recuperate dai rispettivi endpoint di PokéAPI. I Pokédex regionali arriveranno nella prossima fase.</p>
             </div>
           </div>
           <footer className="site-footer">Poke Apidex è un progetto indipendente e non ufficiale. Pokémon e relativi marchi appartengono ai rispettivi titolari.</footer>

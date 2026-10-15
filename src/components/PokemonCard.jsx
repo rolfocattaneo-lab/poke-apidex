@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getPokemonDetails } from '../lib/pokeapi.js'
+import { getPokemonEntryDetails } from '../lib/pokeapi.js'
 
 const typeNames = {
   normal: 'Normale', fighting: 'Lotta', flying: 'Volante', poison: 'Veleno',
@@ -9,61 +9,102 @@ const typeNames = {
   dark: 'Buio', fairy: 'Folletto',
 }
 
-function displayName(name) {
-  return name
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+const categoryNames = {
+  regional: 'Forma regionale',
+  mega: 'Mega Evoluzione',
+  gmax: 'Gigamax',
+  other: 'Forma alternativa',
+}
+
+const suffixNames = {
+  mega: 'Mega', gmax: 'Gigamax', alola: 'Alola', galar: 'Galar',
+  hisui: 'Hisui', paldea: 'Paldea', x: 'X', y: 'Y',
+}
+
+function titleCase(text) {
+  return text.split('-').map((word) =>
+    suffixNames[word] || (word.charAt(0).toUpperCase() + word.slice(1)),
+  ).join(' ')
+}
+
+function getDisplayName(entry) {
+  const species = titleCase(entry.speciesName)
+  const suffix = entry.name.slice(entry.speciesName.length).replace(/^-/, '')
+  return suffix ? `${species} · ${titleCase(suffix)}` : species
+}
+
+function getSpriteOptions(details, source) {
+  if (!details) return []
+
+  const sprites = details.sprites || {}
+  const options = source === 'form'
+    ? [sprites.front_default]
+    : [sprites.other?.['official-artwork']?.front_default, sprites.front_default]
+
+  if (source === 'form' && sprites.versions) {
+    for (const generation of Object.values(sprites.versions)) {
+      for (const version of Object.values(generation || {})) {
+        options.push(version?.front_default)
+      }
+    }
+  }
+
+  return [...new Set(options.filter(Boolean))]
 }
 
 export default function PokemonCard({ pokemon, list }) {
-  const { id, name } = pokemon
   const [details, setDetails] = useState(null)
+  const [error, setError] = useState(false)
+  const [imageIndex, setImageIndex] = useState(0)
 
   useEffect(() => {
     let active = true
 
-    getPokemonDetails(id)
+    getPokemonEntryDetails(pokemon)
       .then((data) => { if (active) setDetails(data) })
-      .catch(() => { /* Il catalogo resta consultabile anche se un dettaglio non si carica. */ })
+      .catch(() => { if (active) setError(true) })
 
     return () => { active = false }
-  }, [id])
+  }, [pokemon])
 
+  const title = getDisplayName(pokemon)
   const types = details?.types?.map(({ type }) => type.name) || []
   const primaryType = types[0] || 'neutral'
-  const artwork = details?.sprites?.other?.['official-artwork']?.front_default
-    || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
-  const fallback = details?.sprites?.front_default
-    || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+  const images = getSpriteOptions(details, pokemon.source)
+  const image = images[imageIndex]
 
   return (
     <article className={'pokemon-card pokemon-' + primaryType + (list ? ' pokemon-card-list' : '')}>
       <div className="pokemon-card-image">
-        <img
-          src={artwork}
-          alt={'Artwork di ' + displayName(name)}
-          loading="lazy"
-          onError={(event) => {
-            if (event.currentTarget.src !== fallback) {
-              event.currentTarget.src = fallback
-            } else {
-              event.currentTarget.style.visibility = 'hidden'
-            }
-          }}
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={'Immagine della forma ' + title}
+            loading="lazy"
+            onError={() => setImageIndex((index) => index + 1)}
+          />
+        ) : (
+          <span className="pokemon-no-image">{details || error ? 'Immagine non disponibile' : 'Caricamento immagine…'}</span>
+        )}
       </div>
       <div className="pokemon-card-body">
-        <span className="pokemon-number">#{String(id).padStart(4, '0')}</span>
-        <h3>{displayName(name)}</h3>
+        <div className="pokemon-card-meta">
+          <span className="pokemon-number">#{String(pokemon.speciesId).padStart(4, '0')}</span>
+          {pokemon.category !== 'base' && (
+            <span className={'form-badge form-badge-' + pokemon.category}>
+              {categoryNames[pokemon.category]}
+            </span>
+          )}
+        </div>
+        <h3>{title}</h3>
         <div className="type-list">
-          {types.length === 0 ? (
-            <span className="types-loading">Tipi in caricamento…</span>
-          ) : types.map((type) => (
+          {types.length ? types.map((type) => (
             <span key={type} className={'type-chip type-' + type}>
               {typeNames[type] || type}
             </span>
-          ))}
+          )) : (
+            <span className="types-loading">{error ? 'Tipi non disponibili' : 'Tipi in caricamento…'}</span>
+          )}
         </div>
       </div>
     </article>

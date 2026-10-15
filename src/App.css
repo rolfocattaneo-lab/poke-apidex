@@ -181,3 +181,13 @@
 .type-dragon { background: #7770c5; }
 .type-dark { background: #64616b; }
 .type-fairy { background: #cd82b5; }
+
+/* Forme alternative: numero nazionale e classificazione */
+.pokemon-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 20px; }
+.form-badge { display: inline-flex; align-items: center; padding: 3px 7px; border-radius: 7px; background: rgba(255,255,255,.65); font-size: 10px; font-weight: 750; color: #526076; }
+.form-badge-mega { color: #9a4b74; }
+.form-badge-gmax { color: #a33d55; }
+.form-badge-regional { color: #477a9a; }
+.pokemon-no-image { display: block; max-width: 150px; padding: 16px; color: #647084; text-align: center; font-size: 12px; line-height: 1.5; }
+.pokemon-card h3 { overflow-wrap: anywhere; }
+.app[data-theme="dark"] .filter-field select:not(:disabled) { color: var(--text); }

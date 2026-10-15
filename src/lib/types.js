@@ -49,9 +49,14 @@ function getIdsForType(typeName) {
   return cachedTypeRequests.get(typeName)
 }
 
-// OR: ogni Pokémon che possiede almeno uno dei tipi selezionati passa il filtro.
-// Manteniamo anche gli ID delle varianti con tipi propri (es. Mega Charizard X).
+// Un tipo: corrispondenza per quel tipo.
+// Due tipi: intersezione (AND). Un Pokémon deve possederli entrambi.
+// Gli ID delle varianti con statistiche e tipi propri restano distinti.
 export async function getPokemonIdsByTypes(selectedTypes) {
+  if (selectedTypes.length === 0) return new Set()
+
   const lists = await Promise.all(selectedTypes.map(getIdsForType))
-  return new Set(lists.flatMap((ids) => [...ids]))
+  return new Set([...lists[0]].filter((pokemonId) =>
+    lists.every((ids) => ids.has(pokemonId)),
+  ))
 }

@@ -153,11 +153,12 @@ function App() {
     setCatalogRetry((retry) => retry + 1)
   }
 
-  function changeType(typeId) {
-    const next = selectedTypes.includes(typeId)
-      ? selectedTypes.filter((id) => id !== typeId)
-      : [...selectedTypes, typeId]
-
+  function changeType(slot, typeId) {
+    const values = [selectedTypes[0] || '', selectedTypes[1] || '']
+    values[slot] = typeId
+    // La selezione di un solo tipo viene mantenuta nel primo campo;
+    // due tipi distinti richiedono entrambi i tipi (AND).
+    const next = [...new Set(values.filter(Boolean))]
     setSelectedTypes(next)
     setTypeIds(null)
     setTypesLoading(next.length > 0)
@@ -245,29 +246,27 @@ function App() {
             <div className="input-with-icon"><Icon name="search" size={17} /><input id="name-search" type="search" autoComplete="off" value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(PAGE_SIZE) }} placeholder="Es. Pikachu o 25" disabled={catalogLoading} /></div>
           </div>
           <div className="filter-field">
-            <span className="filter-type-title">Tipo</span>
-            <details className="type-filter">
-              <summary>{selectedTypes.length ? selectedTypes.length + (selectedTypes.length === 1 ? ' tipo selezionato' : ' tipi selezionati') : 'Tutti i tipi'}</summary>
-              <div className="type-filter-controls">
-                <div className="type-filter-grid" role="group" aria-label="Filtra per uno o più tipi Pokémon">
-                  {pokemonTypes.map(({ id, label }) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={'type-filter-chip' + (selectedTypes.includes(id) ? ' type-filter-chip-selected' : '')}
-                      aria-pressed={selectedTypes.includes(id)}
-                      onClick={() => changeType(id)}
-                    >
-                      <span className={'type-filter-dot type-' + id} aria-hidden="true" />{label}
-                    </button>
-                  ))}
-                </div>
-                {selectedTypes.length > 0 && (
-                  <button type="button" className="clear-type-filter" onClick={clearTypes}>Deseleziona tutti i tipi</button>
-                )}
-                <p className="type-filter-note">Più tipi = almeno uno dei tipi selezionati (OR).</p>
-              </div>
-            </details>
+            <span className="filter-type-title">Tipi Pokémon</span>
+            <div className="type-pair" role="group" aria-label="Filtro per massimo due tipi">
+              <label htmlFor="type-1">Tipo 1</label>
+              <select id="type-1" value={selectedTypes[0] || ''} onChange={(event) => changeType(0, event.target.value)}>
+                <option value="">Tutti i tipi</option>
+                {pokemonTypes.map(({ id, label }) => (
+                  <option key={id} value={id} disabled={selectedTypes[1] === id}>{label}</option>
+                ))}
+              </select>
+              <label htmlFor="type-2">Tipo 2</label>
+              <select id="type-2" value={selectedTypes[1] || ''} onChange={(event) => changeType(1, event.target.value)}>
+                <option value="">Qualsiasi / nessuno</option>
+                {pokemonTypes.map(({ id, label }) => (
+                  <option key={id} value={id} disabled={selectedTypes[0] === id}>{label}</option>
+                ))}
+              </select>
+              <p className="type-filter-note">Un tipo: tutti i Pokémon di quel tipo. Due tipi: solo chi li possiede entrambi (AND).</p>
+              {selectedTypes.length > 0 && (
+                <button type="button" className="clear-type-filter" onClick={clearTypes}>Azzera filtro tipi</button>
+              )}
+            </div>
           </div>
           <div className="filter-field">
             <label htmlFor="form-select">Categoria forma</label>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getPokemonEntryDetails } from '../lib/pokeapi.js'
+import BaseStats from './BaseStats.jsx'
 
 const typeNames = {
   normal: 'Normale', fighting: 'Lotta', flying: 'Volante', poison: 'Veleno',
@@ -112,6 +113,7 @@ export default function PokemonCard({ pokemon, list }) {
           )}
         </div>
       </div>
+      <BaseStats stats={details?.stats} loading={!details && !error} />
     </article>
   )
 }

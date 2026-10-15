@@ -103,8 +103,9 @@ export async function getRegionGames(regionName) {
       .filter((name) => regionalPokedexNames.has(name))
     if (pokedexes.length === 0) return []
 
-    return group.versions.map(({ name }) => ({
+    return group.versions.map(({ name, url }) => ({
       name,
+      versionId: resourceId(url),
       generation: group.generation.name,
       versionGroup: group.name,
       order: group.order,
@@ -112,7 +113,9 @@ export async function getRegionGames(regionName) {
     }))
   })
 
-  return games.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
+  return games.sort((a, b) =>
+    a.order - b.order || a.versionId - b.versionId || a.name.localeCompare(b.name),
+  )
 }
 
 export async function getRegionalPokedexEntries(pokedexNames) {

@@ -154,11 +154,34 @@ function App() {
             <div><span className="eyebrow">ESPLORA</span><h2>Filtri Pokédex</h2></div>
             <button type="button" className="filter-close" onClick={() => setFiltersOpen(false)} aria-label="Chiudi filtri"><Icon name="close" /></button>
           </div>
-          <p className="filter-hint">Cerca un Pokémon per nome o numero e scegli se mostrare la forma base, le Mega Evoluzioni, le forme regionali o le altre varianti.</p>
+          <p className="filter-hint">Scegli il Pokédex nazionale oppure una regione, una generazione e un gioco. Poi cerca i Pokémon e le loro forme.</p>
           <div className="filter-field">
-            <label htmlFor="dex-select">Pokédex</label>
-            <select id="dex-select" disabled><option>Nazionale</option></select>
+            <label htmlFor="region-select">Regione / Pokédex</label>
+            <select id="region-select" value={regional.region} onChange={(event) => { regional.selectRegion(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+              <option value="national">Nazionale (tutti i Pokémon)</option>
+              {regional.regions.map((item) => <option key={item.name} value={item.name}>{regionLabel(item.name)}</option>)}
+            </select>
+            {regional.regionsError && <p className="field-help field-error">{regional.regionsError} <button type="button" onClick={regional.retryRegions}>Riprova</button></p>}
           </div>
+          {regional.region !== 'national' && (
+            <>
+              <div className="filter-field">
+                <label htmlFor="generation-select">Generazione</label>
+                <select id="generation-select" value={regional.generation} disabled={regional.optionsLoading || !!regional.optionsError || regional.generations.length === 0} onChange={(event) => { regional.selectGeneration(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+                  <option value="">{regional.optionsLoading ? 'Caricamento…' : 'Seleziona una generazione'}</option>
+                  {regional.generations.map((name) => <option key={name} value={name}>{generationLabel(name)}</option>)}
+                </select>
+              </div>
+              <div className="filter-field">
+                <label htmlFor="game-select">Gioco</label>
+                <select id="game-select" value={regional.game} disabled={!regional.generation || regional.optionsLoading} onChange={(event) => { regional.selectGame(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+                  <option value="">Seleziona un gioco</option>
+                  {regional.games.map((item) => <option key={item.name} value={item.name}>{gameLabel(item.name)}</option>)}
+                </select>
+                {!regional.optionsLoading && !regional.optionsError && !regional.hasGames && <p className="field-help">PokéAPI non associa ancora Pokédex ai giochi di questa regione.</p>}
+              </div>
+            </>
+          )}
           <div className="filter-field">
             <label htmlFor="name-search">Nome o numero</label>
             <div className="input-with-icon"><Icon name="search" size={17} /><input id="name-search" type="search" autoComplete="off" value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(PAGE_SIZE) }} placeholder="Es. Pikachu o 25" disabled={catalogLoading} /></div>
@@ -179,7 +202,7 @@ function App() {
               <option value="other">Altre forme</option>
             </select>
           </div>
-          <div className="sidebar-note"><span className="note-dot" /> Le forme alternative mantengono il numero nazionale della specie. Le varianti puramente estetiche potrebbero avere solo uno sprite.</div>
+          <div className="sidebar-note"><span className="note-dot" /> Nei Pokédex regionali le forme condividono il numero della specie. La presenza di una forma qui non ne garantisce la disponibilità nel gioco scelto.</div>
         </aside>
 
         <main className="main-content">

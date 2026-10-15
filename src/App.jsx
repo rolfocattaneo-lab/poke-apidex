@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import PokemonCard from './components/PokemonCard.jsx'
 import { getNationalCatalog } from './lib/pokeapi.js'
+import { useRegionalPokedex } from './hooks/useRegionalPokedex.js'
+import { regionLabel, generationLabel, gameLabel } from './lib/regional.js'
 import './App.css'
 
 const PAGE_SIZE = 24
@@ -35,6 +37,7 @@ function App() {
   const [catalogError, setCatalogError] = useState('')
   const [catalogRetry, setCatalogRetry] = useState(0)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const regional = useRegionalPokedex()
 
   useEffect(() => {
     if (!window.location.hash) window.location.hash = '#/pokemon'
@@ -68,6 +71,28 @@ function App() {
     }
   }, [catalogRetry])
 
+  const regionalCatalog = useMemo(() => {
+    if (regional.region === 'national') return catalog
+    if (!regional.ready || !regional.entries) return []
+
+    const bySpecies = new Map()
+    for (const pokemon of catalog) {
+      const forms = bySpecies.get(pokemon.speciesId) || []
+      forms.push(pokemon)
+      bySpecies.set(pokemon.speciesId, forms)
+    }
+
+    // L'ordine delle specie segue il Pokédex del gioco selezionato.
+    // Si includono tutte le forme presenti in PokéAPI, anche se non ottenibili in quel gioco.
+    return regional.entries.flatMap((entry) =>
+      (bySpecies.get(entry.speciesId) || []).map((pokemon) => ({
+        ...pokemon,
+        regionalNumber: entry.regionalNumber,
+        pokedexName: entry.pokedexName,
+      })),
+    )
+  }, [catalog, regional.region, regional.ready, regional.entries])
+
   const matchingPokemon = useMemo(() => {
     const query = search.trim().toLowerCase()
     const numberQuery = /^#?\d+$/.test(query)
@@ -75,7 +100,7 @@ function App() {
       : null
     const words = query.replaceAll(' ', '-').split('-').filter(Boolean)
 
-    return catalog.filter((pokemon) => {
+    return regionalCatalog.filter((pokemon) => {
       if (formFilter === 'base' && pokemon.category !== 'base') return false
       if (formFilter === 'alternative' && pokemon.category === 'base') return false
       if (!['all', 'base', 'alternative'].includes(formFilter) && pokemon.category !== formFilter) return false
@@ -84,10 +109,11 @@ function App() {
       if (numberQuery !== null) return pokemon.speciesId === numberQuery
       return words.every((word) => pokemon.name.includes(word))
     })
-  }, [catalog, search, formFilter])
+  }, [regionalCatalog, search, formFilter])
 
   const visiblePokemon = matchingPokemon.slice(0, visibleCount)
   const effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme
+  const isLoading = catalogLoading || regional.loading
 
   function retryCatalog() {
     setCatalogError('')

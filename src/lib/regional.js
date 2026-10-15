@@ -83,7 +83,7 @@ export function gameLabel(name) {
 }
 
 export async function getRegions() {
-  const response = await fetchResource('region?limit=100')
+  const response = await fetchResource('region/?limit=100')
   return response.results
     .map(({ name, url }) => ({ name, id: resourceId(url) }))
     .filter(({ id }) => Number.isInteger(id))

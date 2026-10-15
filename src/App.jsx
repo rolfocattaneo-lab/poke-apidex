@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import PokemonCard from './components/PokemonCard.jsx'
+import { getNationalCatalog } from './lib/pokeapi.js'
 import './App.css'
 
-const previewPokemon = [
-  { number: '0001', name: 'Bulbasaur', types: ['Erba', 'Veleno'], color: 'grass', id: 1 },
-  { number: '0006', name: 'Charizard', types: ['Fuoco', 'Volante'], color: 'fire', id: 6 },
-  { number: '0025', name: 'Pikachu', types: ['Elettro'], color: 'electric', id: 25 },
-]
+const PAGE_SIZE = 24
 
 function Icon({ name, size = 20 }) {
   const icons = {
@@ -25,33 +23,17 @@ function Icon({ name, size = 20 }) {
   )
 }
 
-function PokemonCard({ pokemon, list }) {
-  const { number, name, types, color, id } = pokemon
-  return (
-    <article className={'pokemon-card pokemon-' + color + (list ? ' pokemon-card-list' : '')}>
-      <div className="pokemon-card-image">
-        <img
-          src={'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + id + '.png'}
-          alt={'Artwork ufficiale di ' + name}
-          loading="lazy"
-        />
-      </div>
-      <div className="pokemon-card-body">
-        <span className="pokemon-number">#{number}</span>
-        <h3>{name}</h3>
-        <div className="type-list">
-          {types.map((type) => <span key={type} className={'type-chip type-' + type.toLowerCase()}>{type}</span>)}
-        </div>
-      </div>
-    </article>
-  )
-}
-
 function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('poke-apidex-theme') || 'system')
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   const [view, setView] = useState(() => localStorage.getItem('poke-apidex-view') || 'grid')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [catalog, setCatalog] = useState([])
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [catalogError, setCatalogError] = useState('')
+  const [catalogRetry, setCatalogRetry] = useState(0)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
     if (!window.location.hash) window.location.hash = '#/pokemon'
@@ -64,7 +46,48 @@ function App() {
   useEffect(() => { localStorage.setItem('poke-apidex-theme', theme) }, [theme])
   useEffect(() => { localStorage.setItem('poke-apidex-view', view) }, [view])
 
+  useEffect(() => {
+    let active = true
+    const controller = new AbortController()
+
+    getNationalCatalog(controller.signal)
+      .then((pokemon) => {
+        if (active) setCatalog(pokemon)
+      })
+      .catch((error) => {
+        if (active) setCatalogError(error.message || 'Errore di connessione a PokéAPI.')
+      })
+      .finally(() => {
+        if (active) setCatalogLoading(false)
+      })
+
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [catalogRetry])
+
+  const matchingPokemon = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return catalog
+
+    if (/^#?\d+$/.test(query)) {
+      const number = Number(query.replace('#', ''))
+      return catalog.filter((pokemon) => pokemon.id === number)
+    }
+
+    const normalized = query.replaceAll(' ', '-')
+    return catalog.filter((pokemon) => pokemon.name.includes(normalized))
+  }, [catalog, search])
+
+  const visiblePokemon = matchingPokemon.slice(0, visibleCount)
   const effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme
+
+  function retryCatalog() {
+    setCatalogError('')
+    setCatalogLoading(true)
+    setCatalogRetry((retry) => retry + 1)
+  }
 
   return (
     <div className="app" data-theme={effectiveTheme}>
@@ -99,14 +122,14 @@ function App() {
             <div><span className="eyebrow">ESPLORA</span><h2>Filtri Pokédex</h2></div>
             <button type="button" className="filter-close" onClick={() => setFiltersOpen(false)} aria-label="Chiudi filtri"><Icon name="close" /></button>
           </div>
-          <p className="filter-hint">Questi controlli verranno attivati quando collegheremo il catalogo PokéAPI.</p>
+          <p className="filter-hint">Il catalogo nazionale e la ricerca sono attivi. Aggiungeremo presto i filtri per tipo, regione e forma.</p>
           <div className="filter-field">
             <label htmlFor="dex-select">Pokédex</label>
             <select id="dex-select" disabled><option>Nazionale</option></select>
           </div>
           <div className="filter-field">
             <label htmlFor="name-search">Nome o numero</label>
-            <div className="input-with-icon"><Icon name="search" size={17} /><input id="name-search" placeholder="Cerca un Pokémon" disabled /></div>
+            <div className="input-with-icon"><Icon name="search" size={17} /><input id="name-search" type="search" autoComplete="off" value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(PAGE_SIZE) }} placeholder="Es. Pikachu o 25" disabled={catalogLoading} /></div>
           </div>
           <div className="filter-field">
             <label htmlFor="type-select">Tipo</label>
@@ -116,20 +139,21 @@ function App() {
             <label htmlFor="form-select">Forma</label>
             <select id="form-select" disabled><option>Tutte le forme</option></select>
           </div>
-          <div className="sidebar-note"><span className="note-dot" /> Prossima fase: indice e filtri funzionanti.</div>
+          <div className="sidebar-note"><span className="note-dot" /> Dati Pokémon da PokéAPI. Le forme e i Pokédex regionali arriveranno nella prossima fase.</div>
         </aside>
 
         <main className="main-content">
           <div className="intro">
-            <span className="eyebrow intro-eyebrow">POKÉDEX • PRIME FONDAMENTA</span>
+            <span className="eyebrow intro-eyebrow">POKÉDEX • CATALOGO NAZIONALE</span>
             <h1>Ogni Pokémon.<br /><span>Una storia da scoprire.</span></h1>
-            <p>Un'enciclopedia Pokémon moderna, con forme alternative, sprite storici, evoluzioni e molto altro. La prima interfaccia è pronta; il catalogo arriverà nel prossimo passo.</p>
+            <p>Esplora i Pokémon del Pokédex nazionale, cerca per nome o numero e scopri i loro tipi. Presto arriveranno le forme alternative e i Pokédex regionali.</p>
           </div>
 
           <div className="section-toolbar">
             <div className="section-title">
-              <span className="eyebrow">ANTEPRIMA GRAFICA</span>
+              <span className="eyebrow">CATALOGO DA POKÉAPI</span>
               <h2>Il tuo Pokédex</h2>
+              <p className="catalog-count" role="status">{catalogLoading ? 'Caricamento del catalogo…' : catalogError ? 'Catalogo non disponibile' : matchingPokemon.length + ' Pokémon trovati'}</p>
             </div>
             <div className="toolbar-actions">
               <button type="button" className="mobile-filter-button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen}>
@@ -142,15 +166,34 @@ function App() {
             </div>
           </div>
 
-          <div className={'pokemon-grid' + (view === 'list' ? ' pokemon-grid-list' : '')}>
-            {previewPokemon.map((pokemon) => <PokemonCard key={pokemon.id} pokemon={pokemon} list={view === 'list'} />)}
-          </div>
+          {catalogError ? (
+            <div className="catalog-feedback" role="alert">
+              <p>{catalogError}</p>
+              <button type="button" className="catalog-button" onClick={retryCatalog}>Riprova</button>
+            </div>
+          ) : catalogLoading ? (
+            <div className="catalog-feedback" role="status">Sto caricando il Pokédex nazionale da PokéAPI…</div>
+          ) : visiblePokemon.length === 0 ? (
+            <div className="catalog-feedback">Nessun Pokémon trovato. Prova un altro nome o numero.</div>
+          ) : (
+            <div className={'pokemon-grid' + (view === 'list' ? ' pokemon-grid-list' : '')}>
+              {visiblePokemon.map((pokemon) => <PokemonCard key={pokemon.id} pokemon={pokemon} list={view === 'list'} />)}
+            </div>
+          )}
+
+          {!catalogLoading && !catalogError && visibleCount < matchingPokemon.length && (
+            <div className="load-more">
+              <button type="button" className="catalog-button" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
+                Carica altri Pokémon ({Math.min(visibleCount, matchingPokemon.length)} di {matchingPokemon.length})
+              </button>
+            </div>
+          )}
 
           <div className="next-step">
             <span className="next-step-icon"><Icon name="arrow" size={20} /></span>
             <div>
-              <strong>La base è pronta.</strong>
-              <p>Le tre schede qui sopra sono un'anteprima. La prossima fase collegherà l'intero catalogo PokéAPI, con ricerca, Pokédex regionali e forme alternative.</p>
+              <strong>Il catalogo nazionale è collegato.</strong>
+              <p>Le schede e i tipi arrivano da PokéAPI. Nel prossimo passaggio aggiungeremo forme alternative, filtri e Pokédex regionali.</p>
             </div>
           </div>
           <footer className="site-footer">Poke Apidex è un progetto indipendente e non ufficiale. Pokémon e relativi marchi appartengono ai rispettivi titolari.</footer>

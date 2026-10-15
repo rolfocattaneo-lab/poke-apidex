@@ -136,3 +136,48 @@
 @media (prefers-reduced-motion: reduce) {
   .pokemon-card, .filter-panel { transition: none; }
 }
+
+/* Catalogo Pokémon — colori dei tipi e stati della ricerca */
+.catalog-count { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.types-loading { display: inline-block; min-height: 22px; font-size: 11px; color: #566375; }
+.catalog-feedback { padding: 36px 20px; text-align: center; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.6; }
+.catalog-feedback p { margin: 0 0 16px; }
+.load-more { display: flex; justify-content: center; margin-top: 26px; }
+.catalog-button { padding: 13px 20px; border: none; border-radius: 11px; background: var(--accent); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity .15s ease; }
+.catalog-button:hover { opacity: .88; }
+.pokemon-neutral, .pokemon-normal { background: #ebeef2; }
+.pokemon-fighting { background: #f5e0d9; }
+.pokemon-flying { background: #e9ecfa; }
+.pokemon-poison { background: #efe3f6; }
+.pokemon-ground { background: #f3e6d3; }
+.pokemon-rock { background: #eae5d5; }
+.pokemon-bug { background: #eaf2d8; }
+.pokemon-ghost { background: #e6e2f3; }
+.pokemon-steel { background: #e5edf0; }
+.pokemon-fire { background: #fce7df; }
+.pokemon-water { background: #e1effc; }
+.pokemon-grass { background: #e1f4e6; }
+.pokemon-electric { background: #fdf3d2; }
+.pokemon-psychic { background: #fbe3ed; }
+.pokemon-ice { background: #dff4f6; }
+.pokemon-dragon { background: #e5e2fa; }
+.pokemon-dark { background: #e7e2e2; }
+.pokemon-fairy { background: #fbe6f4; }
+.type-normal { background: #89929b; }
+.type-fighting { background: #c76a4e; }
+.type-flying { background: #8398cc; }
+.type-poison { background: #9563ad; }
+.type-ground { background: #bd8d50; }
+.type-rock { background: #a38b5b; }
+.type-bug { background: #829e3c; }
+.type-ghost { background: #7664a8; }
+.type-steel { background: #6e98a5; }
+.type-fire { background: #e76a49; }
+.type-water { background: #5b8ec9; }
+.type-grass { background: #56a46d; }
+.type-electric { background: #bf922c; }
+.type-psychic { background: #d77397; }
+.type-ice { background: #579ea8; }
+.type-dragon { background: #7770c5; }
+.type-dark { background: #64616b; }
+.type-fairy { background: #cd82b5; }

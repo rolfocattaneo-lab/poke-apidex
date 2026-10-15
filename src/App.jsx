@@ -31,7 +31,7 @@ function App() {
   const [view, setView] = useState(() => localStorage.getItem('poke-apidex-view') || 'grid')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const [formFilter, setFormFilter] = useState('all')
+  const [formFilter, setFormFilter] = useState('base')
   const [catalog, setCatalog] = useState([])
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [catalogError, setCatalogError] = useState('')
@@ -157,7 +157,7 @@ function App() {
           <p className="filter-hint">Scegli il Pokédex nazionale oppure una regione, una generazione e un gioco. Poi cerca i Pokémon e le loro forme.</p>
           <div className="filter-field">
             <label htmlFor="region-select">Regione / Pokédex</label>
-            <select id="region-select" value={regional.region} onChange={(event) => { regional.selectRegion(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+            <select id="region-select" value={regional.region} onChange={(event) => { regional.selectRegion(event.target.value); setFormFilter('base'); setVisibleCount(PAGE_SIZE) }}>
               <option value="national">Nazionale (tutti i Pokémon)</option>
               {regional.regions.map((item) => <option key={item.name} value={item.name}>{regionLabel(item.name)}</option>)}
             </select>
@@ -167,14 +167,14 @@ function App() {
             <>
               <div className="filter-field">
                 <label htmlFor="generation-select">Generazione</label>
-                <select id="generation-select" value={regional.generation} disabled={regional.optionsLoading || !!regional.optionsError || regional.generations.length === 0} onChange={(event) => { regional.selectGeneration(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+                <select id="generation-select" value={regional.generation} disabled={regional.optionsLoading || !!regional.optionsError || regional.generations.length === 0} onChange={(event) => { regional.selectGeneration(event.target.value); setFormFilter('base'); setVisibleCount(PAGE_SIZE) }}>
                   <option value="">{regional.optionsLoading ? 'Caricamento…' : 'Seleziona una generazione'}</option>
                   {regional.generations.map((name) => <option key={name} value={name}>{generationLabel(name)}</option>)}
                 </select>
               </div>
               <div className="filter-field">
                 <label htmlFor="game-select">Gioco</label>
-                <select id="game-select" value={regional.game} disabled={!regional.generation || regional.optionsLoading} onChange={(event) => { regional.selectGame(event.target.value); setVisibleCount(PAGE_SIZE) }}>
+                <select id="game-select" value={regional.game} disabled={!regional.generation || regional.optionsLoading} onChange={(event) => { regional.selectGame(event.target.value); setFormFilter('base'); setVisibleCount(PAGE_SIZE) }}>
                   <option value="">Seleziona un gioco</option>
                   {regional.games.map((item) => <option key={item.name} value={item.name}>{gameLabel(item.name)}</option>)}
                 </select>

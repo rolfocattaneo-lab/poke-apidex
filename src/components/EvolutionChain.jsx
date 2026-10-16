@@ -203,7 +203,7 @@ function EvolutionMethod({ parent, next, onSelect, fork }) {
   )
 }
 
-function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect }) {
+function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect, incoming = null }) {
   const children = node.evolves_to || []
   const isFork = children.length > 1
 
@@ -214,6 +214,14 @@ function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect })
         currentSpeciesId={currentSpeciesId}
         catalogBySpecies={catalogBySpecies}
       />
+      {incoming && (
+        <EvolutionMethod
+          parent={incoming.parent}
+          next={incoming.next}
+          fork
+          onSelect={onSelect}
+        />
+      )}
 
       {children.length > 0 && (
         <div className={'evolution-children' + (isFork ? ' evolution-children-grid' : '')}>
@@ -222,17 +230,20 @@ function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect })
               className={'evolution-child' + (isFork ? ' evolution-child-tile' : '')}
               key={next.species.url}
             >
-              <EvolutionMethod
-                parent={node.species}
-                next={next}
-                fork={isFork}
-                onSelect={onSelect}
-              />
+              {!isFork && (
+                <EvolutionMethod
+                  parent={node.species}
+                  next={next}
+                  onSelect={onSelect}
+                  fork={false}
+                />
+              )}
               <EvolutionBranch
                 node={next}
                 currentSpeciesId={currentSpeciesId}
                 catalogBySpecies={catalogBySpecies}
                 onSelect={onSelect}
+                incoming={isFork ? { parent: node.species, next } : null}
               />
             </div>
           ))}

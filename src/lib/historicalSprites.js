@@ -78,6 +78,14 @@ export function getLatestItalianFlavor(species) {
     .at(-1) || null
 }
 
+export function getLatestAvailableFlavor(species) {
+  const italian = getLatestItalianFlavor(species)
+  if (italian) return italian
+  return species?.flavor_text_entries
+    ?.filter((entry) => entry.language?.name === 'en')
+    .at(-1) || null
+}
+
 export function cleanFlavorText(value) {
   return value.replace(/[\f\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim()
 }

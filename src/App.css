@@ -460,12 +460,13 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   width: 100%;
   min-width: 0;
 }
-.evolution-child-tile > .evolution-method {
+.evolution-child-tile > .evolution-branch > .evolution-method {
   order: 1;
   width: 100%;
   min-width: 0;
-  margin-top: auto;
+  margin-top: 2px;
 }
+.evolution-child-tile > .evolution-branch > .evolution-children { order: 2; }
 .evolution-child-tile .evolution-species {
   width: min(100%, 154px);
   min-width: 0;
@@ -473,7 +474,8 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   background: var(--surface);
 }
 .evolution-child-tile .evolution-species-active { background: var(--accent-soft); }
-.evolution-child-tile .evolution-method-label { min-height: 16px; }
+.evolution-child-tile .evolution-method-label { min-height: 2.8em; }
+.evolution-child-tile .evolution-method { min-width: 0; width: 100%; }
 /* Una biforcazione può avere stadi successivi (es. Wurmple). */
 .evolution-child-tile .evolution-children:not(.evolution-children-grid),
 .evolution-child-tile .evolution-child:not(.evolution-child-tile) {
@@ -530,9 +532,13 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
     width: 100%;
   }
   .evolution-method { min-width: 112px; width: 112px; }
-  .evolution-child-tile > .evolution-method { min-width: 0; width: 100%; }
+  .evolution-child-tile > .evolution-branch > .evolution-method { min-width: 0; width: 100%; }
 }
 @media (max-width: 390px) {
   .evolution-child-tile .evolution-species-picture { width: 94px; height: 85px; }
   .evolution-child-tile .evolution-species strong { font-size: 12px; }
 }
+
+/* In una biforcazione annidata la scheda precede sempre la propria condizione. */
+.evolution-child-tile .evolution-branch-split { display: flex; flex-direction: column; align-items: center; gap: 9px; width: 100%; }
+.evolution-child-tile .evolution-children-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }

@@ -23,21 +23,15 @@ export const pokemonTypes = [
   { id: 'fairy', label: 'Folletto' },
 ]
 
-function getIdsForType(typeName) {
+// La risorsa /type contiene sia i Pokémon del filtro sia le relazioni
+// offensive/difensive. Condividiamo la stessa richiesta e la stessa cache.
+function getTypeData(typeName) {
   if (!cachedTypeRequests.has(typeName)) {
     const request = fetch(`${API_BASE}/type/${typeName}/`)
       .then((response) => {
-        if (!response.ok) throw new Error('Impossibile caricare il filtro per tipo da PokéAPI.')
+        if (!response.ok) throw new Error('Impossibile caricare il tipo da PokéAPI.')
         return response.json()
       })
-      .then((data) => new Set(
-        data.pokemon
-          .map(({ pokemon }) => {
-            const match = pokemon.url.match(/\/pokemon\/(\d+)\/?$/)
-            return match ? Number(match[1]) : null
-          })
-          .filter(Number.isInteger),
-      ))
       .catch((error) => {
         cachedTypeRequests.delete(typeName)
         throw error
@@ -45,10 +39,34 @@ function getIdsForType(typeName) {
 
     cachedTypeRequests.set(typeName, request)
   }
-
   return cachedTypeRequests.get(typeName)
 }
 
+function getIdsForType(typeName) {
+  return getTypeData(typeName).then((data) => new Set(
+    data.pokemon
+      .map(({ pokemon }) => {
+        const match = pokemon.url.match(/\\/pokemon\\/(\\d+)\\/?$/)
+        return match ? Number(match[1]) : null
+      })
+      .filter(Number.isInteger),
+  ))
+}
+
+// damage_relations.double_damage_from, half_damage_from e no_damage_from
+// descrivono i danni subiti da un Pokémon del tipo richiesto.
+export function getTypeDamageRelations(typeName) {
+  return getTypeData(typeName).then((data) => {
+    const relations = data.damage_relations
+    if (!relations
+      || !Array.isArray(relations.double_damage_from)
+      || !Array.isArray(relations.half_damage_from)
+      || !Array.isArray(relations.no_damage_from)) {
+      throw new Error('Relazioni difensive incomplete in PokéAPI.')
+    }
+    return relations
+  })
+}
 // Un tipo: corrispondenza per quel tipo.
 // Due tipi: intersezione (AND). Un Pokémon deve possederli entrambi.
 // Gli ID delle varianti con statistiche e tipi propri restano distinti.

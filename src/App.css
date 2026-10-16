@@ -250,3 +250,317 @@
   .pokemon-grid-list .pokemon-card-list .pokemon-card-image { width: 100px; height: 115px; }
   .pokemon-grid-list .pokemon-card-list .base-stats { margin: 0 12px 12px; }
 }
+
+/* Navigazione scheda dettaglio: il catalogo resta montato e conserva i filtri. */
+.detail-hidden { display: none !important; }
+.workspace-detail { grid-template-columns: minmax(0, 1fr); }
+.pokemon-card { color: inherit; text-decoration: none; }
+.pokemon-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.pokemon-detail-main { width: 100%; max-width: 1200px; margin: 0 auto; padding-top: 18px; }
+.pokemon-detail-back { display: inline-flex; align-items: center; padding: 4px 0; color: var(--accent); font-size: 13px; font-weight: 750; text-decoration: none; }
+.pokemon-detail-back:hover { text-decoration: underline; }
+.pokemon-detail-heading { margin: 14px 0 19px; }
+.pokemon-detail-heading h1 { margin: 6px 0 10px; font-size: clamp(30px, 4vw, 50px); line-height: 1.15; letter-spacing: -1.5px; }
+.pokemon-detail-meta { display: flex; flex-wrap: wrap; gap: 9px; color: var(--muted); font-size: 12px; font-weight: 650; }
+.pokemon-detail-meta span { padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; }
+.pokemon-detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); gap: 24px; align-items: stretch; }
+.pokemon-detail-artwork { display: flex; align-items: center; justify-content: center; min-height: 420px; padding: 25px; border-radius: 20px; color: #526076; }
+.pokemon-detail-artwork img { width: 100%; max-width: 390px; max-height: 385px; object-fit: contain; filter: drop-shadow(0 18px 12px rgba(28,44,61,.11)); }
+.pokemon-detail-artwork p { text-align: center; font-size: 13px; }
+.pokemon-detail-info { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 30px; }
+.pokemon-detail-info h2 { margin: 0 0 18px; font-size: 22px; letter-spacing: -.6px; }
+.pokemon-detail-measures { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin: 24px 0 0; }
+.pokemon-detail-measures > div { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--page); }
+.pokemon-detail-measures dt { font-size: 11px; font-weight: 700; color: var(--muted); }
+.pokemon-detail-measures dd { margin: 6px 0 0; font-size: 17px; font-weight: 800; }
+.pokemon-detail-stats { margin-top: 23px; border-top: 1px solid var(--line); padding-top: 16px; }
+.pokemon-detail-stats .base-stats { margin: 0; padding: 0; color: var(--text); }
+.pokemon-detail-stats .base-stats-heading { margin-bottom: 15px; font-size: 13px; }
+.pokemon-detail-stats .base-stats-total { font-size: 12px; color: var(--muted); }
+.pokemon-detail-stats .stat-rows { gap: 12px; }
+.pokemon-detail-stats .stat-row { grid-template-columns: 53px minmax(0,1fr) 33px; gap: 10px; }
+.pokemon-detail-stats .stat-track { height: 9px; }
+.pokemon-detail-stats .stat-label, .pokemon-detail-stats .stat-number { font-size: 11px; }
+.pokemon-detail-stats .stat-label { color: var(--muted); }
+.pokemon-detail-stats .stat-number { color: var(--text); }
+.pokemon-detail-stats .stat-placeholder { color: var(--muted); }
+.app[data-theme="dark"] .pokemon-detail-stats .stat-track { background: rgba(185, 200, 222, .19); }
+@media (max-width: 850px) {
+  .pokemon-detail-layout { grid-template-columns: 1fr; }
+  .pokemon-detail-artwork { min-height: 300px; }
+  .pokemon-detail-artwork img { max-height: 285px; }
+}
+@media (max-width: 720px) {
+  .pokemon-detail-heading { margin: 14px 0 18px; }
+  .pokemon-detail-layout { gap: 14px; }
+  .pokemon-detail-info { padding: 22px; }
+  .pokemon-detail-artwork { min-height: 260px; }
+}
+
+/* Scheda dettaglio: varianti cromatiche, abilità e descrizione della specie */
+.pokemon-detail-artwork { flex-direction: column; gap: 16px; }
+.pokemon-detail-image-wrap { display: flex; flex: 1; width: 100%; min-height: 0; align-items: center; justify-content: center; }
+.pokemon-detail-variants { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 5px; background: rgba(255,255,255,.72); border: 1px solid rgba(54,74,91,.11); border-radius: 12px; }
+.pokemon-detail-variants button { padding: 9px 16px; border: 0; border-radius: 9px; background: transparent; color: #566478; font: inherit; font-weight: 750; font-size: 12px; cursor: pointer; }
+.pokemon-detail-variants button.selected { background: #253448; color: #fff; box-shadow: 0 2px 8px rgba(22,35,54,.15); }
+.pokemon-detail-variants button:disabled { opacity: .42; cursor: not-allowed; }
+.pokemon-detail-variants button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.pokemon-detail-abilities { margin-top: 24px; }
+.pokemon-detail-abilities h3 { margin: 0 0 12px; font-size: 14px; font-weight: 800; color: var(--text); }
+.pokemon-detail-ability-list { display: flex; flex-wrap: wrap; gap: 9px; }
+.pokemon-detail-ability { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--page); color: var(--text); font-size: 12px; }
+.pokemon-detail-ability strong { font-weight: 750; }
+.pokemon-detail-ability small { color: var(--accent); font-size: 10px; font-weight: 800; }
+.pokemon-detail-description { margin-top: 24px; padding: 27px 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.pokemon-detail-description h2 { margin: 8px 0 13px; font-size: 22px; letter-spacing: -.6px; }
+.pokemon-detail-description > p:not(.pokemon-detail-species-note) { margin: 0 0 12px; max-width: 850px; font-size: 15px; line-height: 1.7; color: var(--text); }
+.pokemon-detail-description > small { display: block; font-size: 11px; color: var(--muted); }
+.pokemon-detail-unavailable { color: var(--muted) !important; font-size: 12px !important; line-height: 1.55; }
+.pokemon-detail-species-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+@media (max-width: 720px) {
+  .pokemon-detail-description { padding: 22px; margin-top: 14px; }
+  .pokemon-detail-description h2 { font-size: 19px; }
+  .pokemon-detail-description > p:not(.pokemon-detail-species-note) { font-size: 13px; }
+  .pokemon-detail-variants button { padding: 9px 12px; }
+}
+
+/* Evoluzioni: componente riutilizzabile per tutte le catene lineari e ramificate */
+.pokemon-detail-evolutions {
+  margin-top: 24px;
+  padding: 27px 30px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+.pokemon-detail-evolutions h2 { margin: 8px 0 20px; font-size: 22px; letter-spacing: -.6px; }
+.evolution-tree { overflow-x: auto; padding: 4px 3px 12px; }
+.evolution-branch { display: flex; align-items: center; gap: 12px; width: max-content; }
+.evolution-children { display: flex; align-items: center; gap: 10px; }
+.evolution-child { display: flex; align-items: center; gap: 12px; }
+.evolution-species {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 154px;
+  min-width: 154px;
+  height: 160px;
+  padding: 12px 8px 10px;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-align: center;
+  text-decoration: none;
+  background: var(--page);
+  color: var(--text);
+}
+a.evolution-species { cursor: pointer; transition: border-color .15s, transform .15s; }
+a.evolution-species:hover { border-color: var(--accent); transform: translateY(-2px); }
+a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.evolution-species-active { border: 2px solid var(--accent); background: var(--accent-soft); }
+.evolution-species-picture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 91px;
+  color: var(--muted);
+  font-size: 25px;
+}
+.evolution-species-picture img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+.evolution-species strong { max-width: 100%; font-size: 13px; line-height: 1.25; overflow-wrap: anywhere; }
+.evolution-species small { color: var(--muted); font-size: 11px; }
+.evolution-current {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 6px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+}
+.evolution-method {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 132px;
+  min-width: 132px;
+  text-align: center;
+}
+.evolution-arrow { color: var(--accent); font-size: 24px; font-weight: 800; line-height: 1; }
+.evolution-method-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.evolution-details-button {
+  border: none;
+  padding: 4px 2px;
+  color: var(--accent);
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.evolution-details-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.evolution-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+
+/* Una biforcazione usa lo spazio orizzontale per tutte le possibilità,
+   non una colonna verticale di schede o descrizioni molto lunghe. */
+.evolution-branch-split {
+  display: grid;
+  grid-template-columns: 154px minmax(0, 752px);
+  align-items: start;
+  justify-content: center;
+  column-gap: 38px;
+  width: 100%;
+}
+.evolution-branch-split > .evolution-species { justify-self: center; }
+.evolution-children-grid {
+  display: grid;
+  position: relative;
+  grid-template-columns: repeat(var(--evolution-columns, 4), minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 20px 16px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+}
+.evolution-branch-split > .evolution-children-grid::before {
+  content: '→';
+  position: absolute;
+  /* Allineata al centro delle schede da 160px, non alla griglia intera */
+  top: 80px;
+  left: -31px;
+  transform: translateY(-50%);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+}
+.evolution-child-tile {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.evolution-child-tile > .evolution-branch {
+  order: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+}
+.evolution-child-tile > .evolution-branch > .evolution-method {
+  order: 1;
+  width: 100%;
+  min-width: 0;
+  margin-top: 2px;
+}
+.evolution-child-tile > .evolution-branch > .evolution-children { order: 2; }
+.evolution-child-tile .evolution-species {
+  width: min(100%, 154px);
+  min-width: 0;
+  height: 160px;
+  background: var(--page);
+}
+.evolution-child-tile .evolution-species-active { background: var(--accent-soft); }
+.evolution-child-tile .evolution-method-label { min-height: 2.8em; }
+.evolution-child-tile .evolution-method { min-width: 0; width: 100%; }
+/* Una biforcazione può avere stadi successivi (es. Wurmple). */
+.evolution-child-tile .evolution-children:not(.evolution-children-grid),
+.evolution-child-tile .evolution-child:not(.evolution-child-tile) {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+.evolution-child-tile .evolution-child:not(.evolution-child-tile) { gap: 6px; }
+.evolution-child-tile .evolution-child:not(.evolution-child-tile) .evolution-arrow { transform: rotate(90deg); }
+
+/* Dettagli del passaggio selezionato, esterni alle schede per non sfasare la griglia. */
+.evolution-detail-panel {
+  margin: 14px 0 0;
+  padding: 15px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--page);
+}
+.evolution-detail-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.evolution-detail-heading h3 { margin: 0; color: var(--text); font-size: 14px; }
+.evolution-detail-heading button {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.evolution-detail-panel ul { margin: 11px 0 0; padding-left: 19px; color: var(--text); font-size: 12px; line-height: 1.65; }
+.evolution-detail-panel li + li { margin-top: 5px; }
+.evolution-detail-panel p { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+.evolution-detail-panel small { display: block; margin-top: 10px; color: var(--muted); font-size: 11px; }
+
+@media (max-width: 1050px) {
+  .evolution-branch-split { grid-template-columns: 154px minmax(0, 560px); }
+  .evolution-children-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .pokemon-detail-evolutions { padding: 22px; margin-top: 14px; }
+  .pokemon-detail-evolutions h2 { font-size: 19px; }
+  .evolution-tree { overflow-x: auto; }
+  .evolution-branch:not(.evolution-branch-split) { flex-direction: row; width: max-content; }
+  .evolution-child:not(.evolution-child-tile) { flex-direction: row; width: auto; }
+  .evolution-children:not(.evolution-children-grid) { flex-direction: row; width: max-content; }
+  .evolution-branch-split { display: flex; flex-direction: column; align-items: center; gap: 33px; }
+  .evolution-branch-split > .evolution-children-grid::before {
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+  }
+  .evolution-children-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .evolution-child-tile { padding: 0; }
+  .evolution-child-tile > .evolution-branch { flex-direction: column; width: 100%; }
+  .evolution-child-tile .evolution-species { width: min(100%, 154px); }
+  .evolution-child-tile .evolution-children:not(.evolution-children-grid),
+  .evolution-child-tile .evolution-child:not(.evolution-child-tile) {
+    flex-direction: column;
+    width: 100%;
+  }
+  .evolution-method { min-width: 112px; width: 112px; }
+  .evolution-child-tile > .evolution-branch > .evolution-method { min-width: 0; width: 100%; }
+}
+@media (max-width: 390px) {
+  .evolution-child-tile .evolution-species-picture { width: 94px; height: 85px; }
+  .evolution-child-tile .evolution-species strong { font-size: 12px; }
+}
+
+/* In una biforcazione annidata la scheda precede sempre la propria condizione. */
+.evolution-child-tile .evolution-branch-split { display: flex; flex-direction: column; align-items: center; gap: 9px; width: 100%; }
+.evolution-child-tile .evolution-children-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }

@@ -75,7 +75,7 @@ export default function PokemonCard({ pokemon, list }) {
   const image = images[imageIndex]
 
   return (
-    <article className={'pokemon-card pokemon-' + primaryType + (list ? ' pokemon-card-list' : '')}>
+    <a className={'pokemon-card pokemon-' + primaryType + (list ? ' pokemon-card-list' : '')} href={'#/pokemon/' + pokemon.source + '/' + pokemon.id} aria-label={'Apri la scheda di ' + title}>
       <div className="pokemon-card-image">
         {image ? (
           <img
@@ -114,6 +114,6 @@ export default function PokemonCard({ pokemon, list }) {
         </div>
       </div>
       <BaseStats stats={details?.stats} loading={!details && !error} />
-    </article>
+    </a>
   )
 }

@@ -4,6 +4,9 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000
 
 const detailsCache = new Map()
 const formCache = new Map()
+const speciesCache = new Map()
+const abilityCache = new Map()
+const evolutionCache = new Map()
 
 function getResourceId(url) {
   const match = url.match(/\/(\d+)\/?$/)
@@ -159,6 +162,22 @@ export function getPokemonDetails(id) {
   return getCachedDetails(detailsCache, 'pokemon', id)
 }
 
+export function getPokemonSpeciesDetails(speciesId) {
+  return getCachedDetails(speciesCache, 'pokemon-species', speciesId)
+}
+
+export function getAbilityDetails(abilityName) {
+  return getCachedDetails(abilityCache, 'ability', abilityName)
+}
+
+// PokéAPI associa la catena alla specie: condividiamo la stessa richiesta
+// fra forme e Pokémon della medesima linea evolutiva.
+export function getPokemonEvolutionChain(evolutionChainUrl) {
+  const chainId = getResourceId(evolutionChainUrl || '')
+  if (!chainId) return Promise.reject(new Error('Catena evolutiva non disponibile.'))
+  return getCachedDetails(evolutionCache, 'evolution-chain', chainId)
+}
+
 export function getPokemonEntryDetails(entry) {
   if (entry.source !== 'form') return getPokemonDetails(entry.id)
 
@@ -173,6 +192,7 @@ export function getPokemonEntryDetails(entry) {
         ...form,
         types: form.types?.length ? form.types : parent.types,
         stats: parent.stats,
+        abilities: parent.abilities,
       }
     })
 }

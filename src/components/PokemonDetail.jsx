@@ -7,6 +7,7 @@ import {
 import { pokemonTypes } from '../lib/types.js'
 import BaseStats from './BaseStats.jsx'
 import EvolutionChain from './EvolutionChain.jsx'
+import FormSelector from './FormSelector.jsx'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -236,6 +237,8 @@ export default function PokemonDetail({ pokemon, catalog }) {
               </div>
             </div>
           </div>
+
+          <FormSelector pokemon={pokemon} catalog={catalog} />
 
           <section className="pokemon-detail-description">
             <span className="eyebrow">POKÉDEX</span>

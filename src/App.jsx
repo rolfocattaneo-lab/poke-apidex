@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import PokemonCard from './components/PokemonCard.jsx'
+import PokemonDetail from './components/PokemonDetail.jsx'
 import { getNationalCatalog } from './lib/pokeapi.js'
 import { pokemonTypes, getPokemonIdsByTypes } from './lib/types.js'
 import { useRegionalPokedex } from './hooks/useRegionalPokedex.js'
@@ -31,6 +32,7 @@ function App() {
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   const [view, setView] = useState(() => localStorage.getItem('poke-apidex-view') || 'grid')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [currentHash, setCurrentHash] = useState(() => window.location.hash || '#/pokemon')
   const [search, setSearch] = useState('')
   const [formFilter, setFormFilter] = useState('base')
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -51,6 +53,15 @@ function App() {
     const handleChange = (event) => setSystemDark(event.matches)
     media.addEventListener('change', handleChange)
     return () => media.removeEventListener('change', handleChange)
+  }, [])
+
+  useEffect(() => {
+    function handleHashChange() {
+      setCurrentHash(window.location.hash || '#/pokemon')
+      setFiltersOpen(false)
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
   useEffect(() => { localStorage.setItem('poke-apidex-theme', theme) }, [theme])
@@ -116,6 +127,13 @@ function App() {
       })),
     )
   }, [catalog, regional.region, regional.ready, regional.entries])
+
+  const detailRoute = /^#\/pokemon\/(pokemon|form)\/([1-9]\d*)$/.exec(currentHash)
+  const detailKey = detailRoute ? detailRoute[1] + ':' + Number(detailRoute[2]) : null
+  const detailPokemon = detailKey
+    ? regionalCatalog.find((entry) => entry.key === detailKey)
+      || catalog.find((entry) => entry.key === detailKey)
+    : null
 
   const matchingPokemon = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -207,8 +225,8 @@ function App() {
         </div>
       </header>
 
-      <div className="workspace">
-        <aside className={'filter-panel' + (filtersOpen ? ' filter-panel-open' : '')} aria-label="Filtri Pokédex">
+      <div className={'workspace' + (detailKey ? ' workspace-detail' : '')}>
+        <aside className={'filter-panel' + (filtersOpen ? ' filter-panel-open' : '') + (detailKey ? ' detail-hidden' : '')} aria-label="Filtri Pokédex">
           <div className="filter-heading">
             <div><span className="eyebrow">ESPLORA</span><h2>Filtri Pokédex</h2></div>
             <button type="button" className="filter-close" onClick={() => setFiltersOpen(false)} aria-label="Chiudi filtri"><Icon name="close" /></button>
@@ -283,7 +301,7 @@ function App() {
           <div className="sidebar-note"><span className="note-dot" /> Nei Pokédex regionali le forme condividono il numero della specie. La presenza di una forma qui non ne garantisce la disponibilità nel gioco scelto.</div>
         </aside>
 
-        <main className="main-content">
+        <main className={'main-content' + (detailKey ? ' detail-hidden' : '')}>
           <div className="intro">
             <span className="eyebrow intro-eyebrow">POKÉDEX • {regional.region === 'national' ? 'NAZIONALE' : regionLabel(regional.region).toUpperCase()}</span>
             <h1>Ogni Pokémon.<br /><span>Una storia da scoprire.</span></h1>
@@ -362,6 +380,22 @@ function App() {
           </div>
           <footer className="site-footer">Poke Apidex è un progetto indipendente e non ufficiale. Pokémon e relativi marchi appartengono ai rispettivi titolari.</footer>
         </main>
+        {detailKey && (
+          <main className="main-content pokemon-detail-main">
+            {catalogLoading ? (
+              <div className="catalog-feedback" role="status">Caricamento catalogo Pokémon…</div>
+            ) : catalogError ? (
+              <div className="catalog-feedback" role="alert">{catalogError}</div>
+            ) : detailPokemon ? (
+              <PokemonDetail key={detailPokemon.key} pokemon={detailPokemon} />
+            ) : (
+              <div className="catalog-feedback" role="alert">
+                <p>Pokémon non trovato nel catalogo.</p>
+                <a className="catalog-button" href="#/pokemon">Torna al Pokédex</a>
+              </div>
+            )}
+          </main>
+        )}
       </div>
       {filtersOpen && <button type="button" className="filter-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Chiudi pannello filtri" />}
     </div>

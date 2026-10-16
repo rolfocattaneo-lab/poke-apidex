@@ -8,6 +8,8 @@ import { pokemonTypes } from '../lib/types.js'
 import BaseStats from './BaseStats.jsx'
 import EvolutionChain from './EvolutionChain.jsx'
 import FormSelector from './FormSelector.jsx'
+import HistoricalSpriteSelector from './HistoricalSpriteSelector.jsx'
+import { getHistoricalSpriteOptions } from '../lib/historicalSprites.js'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -74,6 +76,7 @@ export default function PokemonDetail({ pokemon, catalog }) {
   const [abilityNames, setAbilityNames] = useState({})
   const [shiny, setShiny] = useState(false)
   const [imageIndex, setImageIndex] = useState(0)
+  const [spriteVersion, setSpriteVersion] = useState('current')
 
   useEffect(() => {
     let active = true
@@ -125,8 +128,14 @@ export default function PokemonDetail({ pokemon, catalog }) {
   const title = displayName(pokemon)
   const types = details?.types?.map(({ type }) => type.name) || []
   const primaryType = types[0] || 'neutral'
-  const normalImages = getSpriteOptions(details, pokemon.source, false)
-  const shinyImages = getSpriteOptions(details, pokemon.source, true)
+  const historicalOptions = getHistoricalSpriteOptions(details)
+  const historicalChoice = historicalOptions.find((option) => option.key === spriteVersion)
+  const normalImages = historicalChoice
+    ? [historicalChoice.normal]
+    : getSpriteOptions(details, pokemon.source, false)
+  const shinyImages = historicalChoice
+    ? [historicalChoice.shiny].filter(Boolean)
+    : getSpriteOptions(details, pokemon.source, true)
   const imageOptions = shiny ? shinyImages : normalImages
   const image = imageOptions[imageIndex]
   const flavor = getItalianFlavor(species)
@@ -135,6 +144,18 @@ export default function PokemonDetail({ pokemon, catalog }) {
   function chooseShiny(nextShiny) {
     setShiny(nextShiny)
     setImageIndex(0)
+  }
+
+  function chooseSpriteVersion(nextVersion) {
+    const nextOption = historicalOptions.find((option) => option.key === nextVersion)
+    if (nextVersion !== 'current' && !nextOption) return
+
+    setSpriteVersion(nextVersion)
+    setImageIndex(0)
+
+    // Prima generazione e certe versioni non prevedono lo shiny.
+    // In quel caso torniamo alla colorazione normale, senza mescolare sprite.
+    if (nextOption && !nextOption.shiny) setShiny(false)
   }
 
   return (
@@ -166,7 +187,8 @@ export default function PokemonDetail({ pokemon, catalog }) {
                   <img
                     key={image}
                     src={image}
-                    alt={'Immagine ' + (shiny ? 'shiny' : 'normale') + ' di ' + title}
+                    alt={(historicalChoice ? 'Sprite ' + historicalChoice.generationLabel + ' ' + historicalChoice.label : 'Artwork attuale') + ' ' + (shiny ? 'shiny' : 'normale') + ' di ' + title}
+                    className={historicalChoice?.pixelated ? 'pokemon-detail-sprite-pixelated' : undefined}
                     onError={() => setImageIndex((index) => index + 1)}
                   />
                 ) : (
@@ -175,6 +197,11 @@ export default function PokemonDetail({ pokemon, catalog }) {
               </div>
               <div className="pokemon-detail-image-controls">
                 <FormSelector pokemon={pokemon} catalog={catalog} />
+                <HistoricalSpriteSelector
+                  options={historicalOptions}
+                  selected={spriteVersion}
+                  onChange={chooseSpriteVersion}
+                />
                 <div className="pokemon-detail-variants" role="group" aria-label="Colorazione del Pokémon">
                 <button
                   type="button"
@@ -189,7 +216,7 @@ export default function PokemonDetail({ pokemon, catalog }) {
                   className={shiny ? 'selected' : ''}
                   aria-pressed={shiny}
                   disabled={shinyImages.length === 0}
-                  title={shinyImages.length === 0 ? 'Sprite shiny non disponibile in PokéAPI' : undefined}
+                  title={shinyImages.length === 0 ? 'Shiny non disponibile per lo sprite selezionato' : undefined}
                   onClick={() => chooseShiny(true)}
                 >
                   ✨ Shiny

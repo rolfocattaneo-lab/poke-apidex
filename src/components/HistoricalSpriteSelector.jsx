@@ -44,7 +44,7 @@ export default function HistoricalSpriteSelector({
 }) {
   const panelId = useId()
   const gameId = useId()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [selected, setSelected] = useState('')
   const [shiny, setShiny] = useState(false)
   const [brokenImage, setBrokenImage] = useState(null)

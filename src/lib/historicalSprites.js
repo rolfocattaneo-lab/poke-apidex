@@ -79,7 +79,7 @@ export function getLatestItalianFlavor(species) {
 }
 
 export function cleanFlavorText(value) {
-  return value.replace(/[\\f\\n\\r\\t]+/g, ' ').replace(/\\s+/g, ' ').trim()
+  return value.replace(/[\f\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 function fallbackName(name) {

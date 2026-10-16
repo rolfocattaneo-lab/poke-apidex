@@ -252,9 +252,6 @@ export default function EvolutionChain({ species, speciesError, currentSpeciesId
   useEffect(() => {
     if (!chainUrl) return undefined
     let active = true
-    setChain(null)
-    setError(false)
-    setSelectedEvolution(null)
 
     getPokemonEvolutionChain(chainUrl)
       .then((data) => {

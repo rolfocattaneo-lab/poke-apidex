@@ -426,7 +426,7 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 .evolution-branch-split {
   display: grid;
   grid-template-columns: 154px minmax(0, 752px);
-  align-items: center;
+  align-items: start;
   justify-content: center;
   column-gap: 38px;
   width: 100%;
@@ -446,7 +446,8 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 .evolution-branch-split > .evolution-children-grid::before {
   content: '→';
   position: absolute;
-  top: 50%;
+  /* Allineata al centro delle schede da 160px, non alla griglia intera */
+  top: 80px;
   left: -31px;
   transform: translateY(-50%);
   font-size: 27px;

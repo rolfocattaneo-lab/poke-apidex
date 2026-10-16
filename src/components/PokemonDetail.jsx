@@ -6,6 +6,7 @@ import {
 } from '../lib/pokeapi.js'
 import { pokemonTypes } from '../lib/types.js'
 import BaseStats from './BaseStats.jsx'
+import EvolutionChain from './EvolutionChain.jsx'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -64,7 +65,7 @@ function cleanFlavorText(value) {
   return value.replace(/[\f\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-export default function PokemonDetail({ pokemon }) {
+export default function PokemonDetail({ pokemon, catalog }) {
   const [details, setDetails] = useState(null)
   const [error, setError] = useState('')
   const [species, setSpecies] = useState(null)
@@ -259,6 +260,13 @@ export default function PokemonDetail({ pokemon }) {
               </p>
             )}
           </section>
+
+          <EvolutionChain
+            species={species}
+            speciesError={speciesError}
+            currentSpeciesId={pokemon.speciesId}
+            catalog={catalog}
+          />
         </>
       )}
     </section>

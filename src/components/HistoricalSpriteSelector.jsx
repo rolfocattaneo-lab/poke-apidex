@@ -1,21 +1,73 @@
 import { useId, useState } from 'react'
-import { getHistoricalSpriteOptions } from '../lib/historicalSprites.js'
+import {
+  cleanFlavorText,
+  getHistoricalSpriteOptions,
+  getLatestItalianFlavor,
+  getVersionFlavor,
+} from '../lib/historicalSprites.js'
 
-export default function HistoricalSpriteSelector({ details, title }) {
+function PokedexDescription({ species, speciesError, flavor, versionLabel, category, fallback = false }) {
+  return (
+    <div className={fallback ? 'pokemon-detail-description' : 'historical-sprites-description'} aria-live="polite">
+      <span className="eyebrow">POKÉDEX</span>
+      <h3>Descrizione del Pokédex</h3>
+      {speciesError ? (
+        <p className="pokemon-detail-unavailable">Impossibile caricare la descrizione da PokéAPI.</p>
+      ) : !species ? (
+        <p className="pokemon-detail-unavailable">Caricamento descrizione…</p>
+      ) : flavor ? (
+        <>
+          <p>{cleanFlavorText(flavor.flavor_text)}</p>
+          <small>
+            {fallback ? 'Descrizione della specie · ' : 'Versione selezionata: ' + versionLabel + ' · '}
+            Lingua: {flavor.language?.name === 'it' ? 'italiano' : 'inglese'}
+          </small>
+        </>
+      ) : (
+        <p className="pokemon-detail-unavailable">
+          {fallback
+            ? 'Descrizione non disponibile in italiano per questa specie.'
+            : 'PokéAPI non riporta una descrizione italiana o inglese per ' + versionLabel + '.'}
+        </p>
+      )}
+      {category !== 'base' && (
+        <p className="pokemon-detail-species-note">
+          La descrizione si riferisce alla specie e non necessariamente a questa forma.
+        </p>
+      )}
+    </div>
+  )
+}
+
+export default function HistoricalSpriteSelector({
+  details, species, speciesError, title, category, primaryType,
+}) {
   const panelId = useId()
+  const gameId = useId()
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState('')
   const [shiny, setShiny] = useState(false)
   const [brokenImage, setBrokenImage] = useState(null)
   const options = getHistoricalSpriteOptions(details)
 
-  // Nessuna sezione superflua quando PokéAPI non ha sprite per la forma.
-  if (!options.length) return null
+  // La descrizione del Pokédex resta disponibile anche per forme senza sprite storici.
+  if (!options.length) {
+    return (
+      <PokedexDescription
+        species={species}
+        speciesError={speciesError}
+        flavor={getLatestItalianFlavor(species)}
+        category={category}
+        fallback
+      />
+    )
+  }
 
   const generations = [...new Set(options.map((option) => option.generation))]
   const choice = options.find((option) => option.key === selected) || options[0]
   const currentImage = shiny ? choice.shiny : choice.normal
   const imageFailed = brokenImage === currentImage
+  const flavor = getVersionFlavor(species, choice.version)
 
   function changeVersion(key) {
     const next = options.find((option) => option.key === key)
@@ -26,7 +78,7 @@ export default function HistoricalSpriteSelector({ details, title }) {
   }
 
   return (
-    <section className="pokemon-detail-historical-sprites" aria-label="Archivio degli sprite storici">
+    <section className="pokemon-detail-historical-sprites" aria-label="Archivio Pokédex e sprite storici">
       <button
         className="historical-sprites-toggle"
         type="button"
@@ -36,9 +88,9 @@ export default function HistoricalSpriteSelector({ details, title }) {
       >
         <span className="historical-sprites-heading">
           <span className="eyebrow">ARCHIVIO</span>
-          <strong>Sprite storici</strong>
+          <strong>Pokédex e sprite storici</strong>
         </span>
-        <span className="historical-sprites-count">{options.length} versioni disponibili</span>
+        <span className="historical-sprites-count">{options.length} giochi e versioni</span>
         <span className="historical-sprites-chevron" aria-hidden="true">{open ? '−' : '+'}</span>
       </button>
 
@@ -46,15 +98,15 @@ export default function HistoricalSpriteSelector({ details, title }) {
         {open && (
           <div className="historical-sprites-content">
             <p className="historical-sprites-intro">
-              Consulta gli sprite dei giochi precedenti senza modificare l'artwork principale.
-              Le versioni disponibili dipendono dai dati PokéAPI per questa forma.
+              Scegli il gioco per vedere lo sprite e la relativa descrizione del Pokédex.
+              Alcuni giochi condividono lo stesso sprite, ma possono avere descrizioni diverse.
             </p>
 
             <div className="historical-sprites-workspace">
               <div className="historical-sprites-settings">
-                <label htmlFor="historical-sprite-game">Gioco / versione</label>
+                <label htmlFor={gameId}>Gioco / versione</label>
                 <select
-                  id="historical-sprite-game"
+                  id={gameId}
                   value={choice.key}
                   onChange={(event) => changeVersion(event.target.value)}
                 >
@@ -93,7 +145,7 @@ export default function HistoricalSpriteSelector({ details, title }) {
                 </div>
               </div>
 
-              <figure className="historical-sprites-preview">
+              <figure className={'historical-sprites-preview pokemon-' + primaryType}>
                 <div className="historical-sprites-image">
                   {currentImage && !imageFailed ? (
                     <img
@@ -113,6 +165,14 @@ export default function HistoricalSpriteSelector({ details, title }) {
                 </figcaption>
               </figure>
             </div>
+
+            <PokedexDescription
+              species={species}
+              speciesError={speciesError}
+              flavor={flavor}
+              versionLabel={choice.label}
+              category={category}
+            />
           </div>
         )}
       </div>

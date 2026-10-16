@@ -155,25 +155,37 @@ function EvolutionSpecies({ species, currentSpeciesId, catalogBySpecies }) {
 }
 
 function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies }) {
+  const children = node.evolves_to || []
+  const isFork = children.length > 1
+
   return (
-    <div className="evolution-branch">
+    <div className={'evolution-branch' + (isFork ? ' evolution-branch-split' : '')}>
       <EvolutionSpecies
         species={node.species}
         currentSpeciesId={currentSpeciesId}
         catalogBySpecies={catalogBySpecies}
       />
 
-      {node.evolves_to?.length > 0 && (
-        <div className="evolution-children">
-          {node.evolves_to.map((next) => {
+      {isFork && (
+        <span className="evolution-fork-heading">
+          ↓ {children.length} possibili evoluzioni
+        </span>
+      )}
+
+      {children.length > 0 && (
+        <div className={'evolution-children' + (isFork ? ' evolution-children-grid' : '')}>
+          {children.map((next) => {
             const methods = [...new Set(
               (next.evolution_details || []).map(evolutionCondition),
             )]
 
             return (
-              <div className="evolution-child" key={next.species.url}>
+              <div
+                className={'evolution-child' + (isFork ? ' evolution-child-tile' : '')}
+                key={next.species.url}
+              >
                 <div className="evolution-method" aria-label="Condizioni di evoluzione">
-                  <span className="evolution-arrow" aria-hidden="true">→</span>
+                  {!isFork && <span className="evolution-arrow" aria-hidden="true">→</span>}
                   {(methods.length ? methods : ['Condizione non indicata']).map((method) => (
                     <span className="evolution-method-label" key={method}>{method}</span>
                   ))}

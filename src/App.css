@@ -863,3 +863,76 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   .type-effectiveness-grid { gap: 10px; }
   .type-effectiveness-group { padding: 13px 14px; }
 }
+
+/* Dettaglio abilità: la descrizione si apre soltanto su richiesta, nella scheda esistente. */
+.pokemon-detail-ability-list .pokemon-detail-ability {
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.pokemon-detail-ability-list .pokemon-detail-ability:hover {
+  border-color: var(--accent);
+}
+.pokemon-detail-ability-list .pokemon-detail-ability.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.pokemon-detail-ability-list .pokemon-detail-ability:focus-visible,
+.pokemon-detail-ability-description button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.pokemon-detail-ability-indicator {
+  margin-left: 3px;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+.pokemon-detail-ability-description {
+  margin-top: 12px;
+  padding: 15px 17px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--text);
+}
+.pokemon-detail-ability-description-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pokemon-detail-ability-description-heading strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+.pokemon-detail-ability-description-heading button,
+.pokemon-detail-ability-description .pokemon-ability-retry {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.pokemon-detail-ability-description > p {
+  margin: 10px 0 0;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.pokemon-detail-ability-description > small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 10px;
+}
+@media (max-width: 720px) {
+  .pokemon-detail-ability-description { padding: 13px 14px; }
+}

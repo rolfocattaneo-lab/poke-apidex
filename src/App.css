@@ -705,7 +705,7 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   min-width: 0;
   margin: 0;
   padding: 15px;
-  background: var(--page);
+  /* Lo sfondo è assegnato dalla stessa classe pokemon-<tipo> dell'artwork. */
   border: 1px solid var(--line);
   border-radius: 15px;
 }
@@ -736,4 +736,46 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 }
 @media (max-width: 390px) {
   .historical-sprites-count { display: none; }
+}
+
+/* Anteprima storico: stessi colori di tipo dell'artwork principale. */
+.historical-sprites-preview figcaption strong { color: #253448; }
+.historical-sprites-preview figcaption span { color: #526076; }
+.historical-sprites-image > span { color: #526076; }
+
+/* Descrizione relativa alla versione scelta, immediatamente sotto gli sprite. */
+.historical-sprites-description {
+  margin-top: 20px;
+  padding: 20px 23px;
+  background: var(--page);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.historical-sprites-description h3 {
+  margin: 7px 0 13px;
+  font-size: 19px;
+  letter-spacing: -.4px;
+  color: var(--text);
+}
+.historical-sprites-description > p:not(.pokemon-detail-species-note) {
+  margin: 0 0 9px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.historical-sprites-description > small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.pokemon-detail-description h3 {
+  margin: 8px 0 13px;
+  font-size: 22px;
+  letter-spacing: -.6px;
+}
+@media (max-width: 760px) {
+  .historical-sprites-description { padding: 18px; margin-top: 16px; }
+  .historical-sprites-description h3 { font-size: 17px; }
+  .historical-sprites-description > p:not(.pokemon-detail-species-note) { font-size: 13px; }
 }

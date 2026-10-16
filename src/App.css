@@ -632,3 +632,45 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   padding-top: 0;
   padding-bottom: 0;
 }
+
+/* Sprite storici: selettore compatto, senza gallerie o sezioni aggiuntive. */
+.pokemon-sprite-picker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  max-width: 100%;
+}
+.pokemon-sprite-picker label {
+  color: #354258;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.pokemon-sprite-picker select {
+  box-sizing: border-box;
+  width: 195px;
+  min-width: 150px;
+  max-width: 100%;
+  height: 44px;
+  padding: 0 11px;
+  color: #253448;
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(54,74,91,.19);
+  border-radius: 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pokemon-sprite-picker select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+/* I vecchi sprite a bassa risoluzione restano nitidi quando ingranditi. */
+.pokemon-detail-artwork img.pokemon-detail-sprite-pixelated {
+  image-rendering: pixelated;
+}
+@media (max-width: 720px) {
+  .pokemon-sprite-picker select { width: min(195px, 52vw); }
+}

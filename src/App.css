@@ -570,24 +570,25 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
   gap: 12px;
   width: 100%;
   flex-shrink: 0;
 }
 .pokemon-form-picker {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
   min-width: 0;
   max-width: 100%;
 }
 .pokemon-form-picker label {
-  padding-left: 2px;
+  padding-left: 0;
   color: #354258;
   font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
 }
 .pokemon-form-picker label span {
   font-size: 10px;
@@ -597,9 +598,10 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 .pokemon-form-picker select {
   box-sizing: border-box;
   max-width: 100%;
-  min-width: 180px;
-  width: min(220px, 100%);
-  padding: 10px 11px;
+  min-width: 160px;
+  width: 200px;
+  height: 44px;
+  padding: 0 11px;
   color: #253448;
   background: rgba(255,255,255,.9);
   border: 1px solid rgba(54,74,91,.19);
@@ -615,6 +617,18 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 }
 @media (max-width: 720px) {
   .pokemon-detail-image-controls { gap: 10px; }
-  .pokemon-form-picker { width: min(220px, 100%); }
-  .pokemon-form-picker select { width: 100%; }
+  .pokemon-form-picker { width: auto; }
+  .pokemon-form-picker select { width: min(200px, 55vw); }
+}
+
+/* Altezza identica per il menu forma e il selettore Normale/Shiny. */
+.pokemon-detail-image-controls .pokemon-detail-variants {
+  box-sizing: border-box;
+  height: 44px;
+  padding: 4px;
+}
+.pokemon-detail-image-controls .pokemon-detail-variants button {
+  height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
 }

@@ -4,6 +4,7 @@ import {
   cleanFlavorText,
   getHistoricalSpriteOptions,
   getLatestItalianFlavor,
+  getLatestAvailableFlavor,
   getVersionFlavor,
 } from './historicalSprites.js'
 
@@ -70,6 +71,12 @@ test('Versione non presente: nessun testo e nessuna sostituzione arbitraria', ()
 test('Fallback senza sprite: ultima descrizione italiana della specie', () => {
   assert.equal(getLatestItalianFlavor(bulbasaur)?.flavor_text, 'Shield IT')
   assert.equal(getLatestItalianFlavor(sprigatito), null)
+})
+
+test('Forme prive di sprite: italiano prioritario, poi inglese disponibile', () => {
+  assert.equal(getLatestAvailableFlavor(bulbasaur)?.flavor_text, 'Shield IT')
+  assert.equal(getLatestAvailableFlavor(sprigatito)?.flavor_text, 'Violet EN')
+  assert.equal(getLatestAvailableFlavor(null), null)
 })
 
 test('I separatori di riga del Pokédex vengono normalizzati', () => {

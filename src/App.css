@@ -354,3 +354,33 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   .evolution-method { width: min(270px, 100%); min-width: 0; }
   .evolution-arrow { transform: rotate(90deg); }
 }
+
+/* Evoluzioni ramificate: specie di partenza al centro, alternative in griglia.
+   Le catene lineari mantengono il layout orizzontale precedente. */
+.evolution-branch-split { flex-direction: column; align-items: center; width: 100%; gap: 9px; }
+.evolution-branch-split > .evolution-species { flex-shrink: 0; }
+.evolution-fork-heading { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .15px; }
+.evolution-children-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; gap: 12px; align-items: start; }
+.evolution-child-tile { box-sizing: border-box; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; min-width: 0; gap: 8px; padding: 11px 9px; border-radius: 14px; border: 1px solid var(--line); background: var(--page); }
+.evolution-child-tile > .evolution-method { min-width: 0; width: 100%; min-height: 30px; justify-content: center; }
+.evolution-child-tile > .evolution-method .evolution-method-label { font-size: 11px; line-height: 1.4; font-weight: 650; }
+.evolution-child-tile > .evolution-branch { width: 100%; min-width: 0; flex-direction: column; gap: 8px; align-items: center; }
+.evolution-child-tile .evolution-species { box-sizing: border-box; min-width: 0; width: min(100%, 170px); padding: 9px 6px; background: var(--surface); }
+.evolution-child-tile .evolution-species-picture { width: 92px; height: 78px; }
+.evolution-child-tile .evolution-species strong { font-size: 12px; }
+.evolution-child-tile .evolution-current { margin-top: 2px; }
+.evolution-children-grid .evolution-children:not(.evolution-children-grid) { flex-direction: column; width: 100%; gap: 8px; align-items: center; }
+.evolution-children-grid .evolution-child:not(.evolution-child-tile) { flex-direction: column; width: 100%; align-items: center; gap: 4px; }
+.evolution-children-grid .evolution-method { min-width: 0; width: 100%; }
+.evolution-children-grid .evolution-arrow { transform: rotate(90deg); }
+@media (max-width: 1100px) {
+  .evolution-children-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .evolution-children-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .evolution-child-tile { padding: 10px 6px; }
+  .evolution-child-tile .evolution-species-picture { width: 80px; height: 73px; }
+}
+@media (max-width: 360px) {
+  .evolution-children-grid { grid-template-columns: 1fr; }
+}

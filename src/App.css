@@ -323,3 +323,34 @@
   .pokemon-detail-description > p:not(.pokemon-detail-species-note) { font-size: 13px; }
   .pokemon-detail-variants button { padding: 9px 12px; }
 }
+
+/* Catena evolutiva: nodi per specie e ramificazioni multiple */
+.pokemon-detail-evolutions { margin-top: 24px; padding: 27px 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.pokemon-detail-evolutions h2 { margin: 8px 0 19px; font-size: 22px; letter-spacing: -.6px; }
+.evolution-tree { overflow-x: auto; padding: 5px 3px 12px; }
+.evolution-branch { display: flex; align-items: center; gap: 12px; width: max-content; }
+.evolution-children { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.evolution-child { display: flex; align-items: center; gap: 12px; }
+.evolution-species { width: 148px; min-width: 148px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 13px 10px; color: var(--text); text-decoration: none; border: 1px solid var(--line); background: var(--page); border-radius: 15px; }
+a.evolution-species { cursor: pointer; transition: border-color .15s, transform .15s; }
+a.evolution-species:hover { border-color: var(--accent); transform: translateY(-2px); }
+a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.evolution-species-active { border: 2px solid var(--accent); background: var(--accent-soft); }
+.evolution-species-picture { width: 115px; height: 107px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 25px; }
+.evolution-species-picture img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+.evolution-species strong { max-width: 100%; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
+.evolution-species small { font-size: 11px; color: var(--muted); }
+.evolution-current { margin-top: 5px; padding: 4px 7px; border-radius: 8px; color: var(--accent); background: var(--surface); font-size: 10px; font-weight: 800; }
+.evolution-method { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 136px; min-width: 136px; text-align: center; }
+.evolution-arrow { color: var(--accent); font-size: 25px; font-weight: 800; line-height: 1; }
+.evolution-method-label { display: block; max-width: 100%; font-size: 10px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+.evolution-note { margin: 15px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+@media (max-width: 760px) {
+  .pokemon-detail-evolutions { padding: 22px; margin-top: 14px; }
+  .pokemon-detail-evolutions h2 { font-size: 19px; }
+  .evolution-tree { overflow-x: visible; }
+  .evolution-branch, .evolution-child { width: 100%; flex-direction: column; align-items: center; gap: 8px; }
+  .evolution-children { width: 100%; align-items: center; gap: 20px; }
+  .evolution-method { width: min(270px, 100%); min-width: 0; }
+  .evolution-arrow { transform: rotate(90deg); }
+}

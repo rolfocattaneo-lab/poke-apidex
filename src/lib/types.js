@@ -46,7 +46,7 @@ function getIdsForType(typeName) {
   return getTypeData(typeName).then((data) => new Set(
     data.pokemon
       .map(({ pokemon }) => {
-        const match = pokemon.url.match(/\\/pokemon\\/(\\d+)\\/?$/)
+        const match = pokemon.url.match(/\/pokemon\/(\d+)\/?$/)
         return match ? Number(match[1]) : null
       })
       .filter(Number.isInteger),

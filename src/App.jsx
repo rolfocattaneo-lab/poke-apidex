@@ -387,7 +387,7 @@ function App() {
             ) : catalogError ? (
               <div className="catalog-feedback" role="alert">{catalogError}</div>
             ) : detailPokemon ? (
-              <PokemonDetail key={detailPokemon.key} pokemon={detailPokemon} />
+              <PokemonDetail key={detailPokemon.key} pokemon={detailPokemon} catalog={catalog} />
             ) : (
               <div className="catalog-feedback" role="alert">
                 <p>Pokémon non trovato nel catalogo.</p>

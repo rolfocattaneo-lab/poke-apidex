@@ -226,7 +226,7 @@ function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect, i
       {children.length > 0 && (
         <div
           className={'evolution-children' + (isFork ? ' evolution-children-grid' : '')}
-          style={isFork ? { '--evolution-columns': Math.min(children.length, 4) } : undefined}
+          style={isFork ? { '--evolution-columns': Math.min(children.length, 4), maxWidth: Math.min(children.length, 4) * 188 } : undefined}
         >
           {children.map((next) => (
             <div

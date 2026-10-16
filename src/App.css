@@ -296,3 +296,30 @@
   .pokemon-detail-info { padding: 22px; }
   .pokemon-detail-artwork { min-height: 260px; }
 }
+
+/* Scheda dettaglio: varianti cromatiche, abilità e descrizione della specie */
+.pokemon-detail-artwork { flex-direction: column; gap: 16px; }
+.pokemon-detail-image-wrap { display: flex; flex: 1; width: 100%; min-height: 0; align-items: center; justify-content: center; }
+.pokemon-detail-variants { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 5px; background: rgba(255,255,255,.72); border: 1px solid rgba(54,74,91,.11); border-radius: 12px; }
+.pokemon-detail-variants button { padding: 9px 16px; border: 0; border-radius: 9px; background: transparent; color: #566478; font: inherit; font-weight: 750; font-size: 12px; cursor: pointer; }
+.pokemon-detail-variants button.selected { background: #253448; color: #fff; box-shadow: 0 2px 8px rgba(22,35,54,.15); }
+.pokemon-detail-variants button:disabled { opacity: .42; cursor: not-allowed; }
+.pokemon-detail-variants button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.pokemon-detail-abilities { margin-top: 24px; }
+.pokemon-detail-abilities h3 { margin: 0 0 12px; font-size: 14px; font-weight: 800; color: var(--text); }
+.pokemon-detail-ability-list { display: flex; flex-wrap: wrap; gap: 9px; }
+.pokemon-detail-ability { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--page); color: var(--text); font-size: 12px; }
+.pokemon-detail-ability strong { font-weight: 750; }
+.pokemon-detail-ability small { color: var(--accent); font-size: 10px; font-weight: 800; }
+.pokemon-detail-description { margin-top: 24px; padding: 27px 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+.pokemon-detail-description h2 { margin: 8px 0 13px; font-size: 22px; letter-spacing: -.6px; }
+.pokemon-detail-description > p:not(.pokemon-detail-species-note) { margin: 0 0 12px; max-width: 850px; font-size: 15px; line-height: 1.7; color: var(--text); }
+.pokemon-detail-description > small { display: block; font-size: 11px; color: var(--muted); }
+.pokemon-detail-unavailable { color: var(--muted) !important; font-size: 12px !important; line-height: 1.55; }
+.pokemon-detail-species-note { margin: 14px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+@media (max-width: 720px) {
+  .pokemon-detail-description { padding: 22px; margin-top: 14px; }
+  .pokemon-detail-description h2 { font-size: 19px; }
+  .pokemon-detail-description > p:not(.pokemon-detail-species-note) { font-size: 13px; }
+  .pokemon-detail-variants button { padding: 9px 12px; }
+}

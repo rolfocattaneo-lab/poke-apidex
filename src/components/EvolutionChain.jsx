@@ -154,7 +154,56 @@ function EvolutionSpecies({ species, currentSpeciesId, catalogBySpecies }) {
   )
 }
 
-function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies }) {
+function briefCondition(details) {
+  if (!details?.length) return 'Condizione non indicata'
+  if (details.length > 1) return 'Più metodi'
+
+  const detail = details[0]
+  const trigger = detail.trigger?.name
+
+  if (trigger === 'use-item') return detail.item ? resourceName(detail.item) : 'Usa un oggetto'
+  if (trigger === 'trade') return detail.held_item ? 'Scambio con oggetto' : 'Scambio'
+  if (detail.min_level) return 'Livello ' + detail.min_level
+  if (detail.min_happiness != null) {
+    if (detail.time_of_day === 'day') return 'Amicizia · giorno'
+    if (detail.time_of_day === 'night') return 'Amicizia · notte'
+    return 'Amicizia'
+  }
+  if (detail.min_affection != null) return 'Affetto'
+  if (detail.min_beauty != null) return 'Bellezza'
+  if (detail.known_move_type) return 'Mossa ' + resourceName(detail.known_move_type)
+  if (detail.known_move) return 'Mossa speciale'
+  if (trigger === 'level-up') return 'Aumento di livello'
+  if (trigger === 'shed') return 'Evoluzione speciale'
+  if (trigger) return titleCase(trigger)
+
+  return 'Metodo speciale'
+}
+
+function EvolutionMethod({ parent, next, onSelect, fork }) {
+  const summary = briefCondition(next.evolution_details)
+
+  return (
+    <div className="evolution-method" aria-label="Condizioni di evoluzione">
+      {!fork && <span className="evolution-arrow" aria-hidden="true">→</span>}
+      <span className="evolution-method-label" title={summary}>{summary}</span>
+      <button
+        type="button"
+        className="evolution-details-button"
+        onClick={() => onSelect({
+          from: titleCase(parent.name),
+          to: titleCase(next.species.name),
+          methods: [...new Set((next.evolution_details || []).map(evolutionCondition))],
+        })}
+        aria-label={'Mostra come si evolve ' + titleCase(parent.name) + ' in ' + titleCase(next.species.name)}
+      >
+        Come si evolve?
+      </button>
+    </div>
+  )
+}
+
+function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies, onSelect }) {
   const children = node.evolves_to || []
   const isFork = children.length > 1
 
@@ -166,38 +215,27 @@ function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies }) {
         catalogBySpecies={catalogBySpecies}
       />
 
-      {isFork && (
-        <span className="evolution-fork-heading">
-          ↓ {children.length} possibili evoluzioni
-        </span>
-      )}
-
       {children.length > 0 && (
         <div className={'evolution-children' + (isFork ? ' evolution-children-grid' : '')}>
-          {children.map((next) => {
-            const methods = [...new Set(
-              (next.evolution_details || []).map(evolutionCondition),
-            )]
-
-            return (
-              <div
-                className={'evolution-child' + (isFork ? ' evolution-child-tile' : '')}
-                key={next.species.url}
-              >
-                <div className="evolution-method" aria-label="Condizioni di evoluzione">
-                  {!isFork && <span className="evolution-arrow" aria-hidden="true">→</span>}
-                  {(methods.length ? methods : ['Condizione non indicata']).map((method) => (
-                    <span className="evolution-method-label" key={method}>{method}</span>
-                  ))}
-                </div>
-                <EvolutionBranch
-                  node={next}
-                  currentSpeciesId={currentSpeciesId}
-                  catalogBySpecies={catalogBySpecies}
-                />
-              </div>
-            )
-          })}
+          {children.map((next) => (
+            <div
+              className={'evolution-child' + (isFork ? ' evolution-child-tile' : '')}
+              key={next.species.url}
+            >
+              <EvolutionMethod
+                parent={node.species}
+                next={next}
+                fork={isFork}
+                onSelect={onSelect}
+              />
+              <EvolutionBranch
+                node={next}
+                currentSpeciesId={currentSpeciesId}
+                catalogBySpecies={catalogBySpecies}
+                onSelect={onSelect}
+              />
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -207,12 +245,16 @@ function EvolutionBranch({ node, currentSpeciesId, catalogBySpecies }) {
 export default function EvolutionChain({ species, speciesError, currentSpeciesId, catalog }) {
   const [chain, setChain] = useState(null)
   const [error, setError] = useState(false)
+  const [selectedEvolution, setSelectedEvolution] = useState(null)
 
   const chainUrl = species?.evolution_chain?.url
 
   useEffect(() => {
     if (!chainUrl) return undefined
     let active = true
+    setChain(null)
+    setError(false)
+    setSelectedEvolution(null)
 
     getPokemonEvolutionChain(chainUrl)
       .then((data) => {
@@ -259,8 +301,27 @@ export default function EvolutionChain({ species, speciesError, currentSpeciesId
               node={chain}
               currentSpeciesId={currentSpeciesId}
               catalogBySpecies={catalogBySpecies}
+              onSelect={setSelectedEvolution}
             />
           </div>
+          {selectedEvolution && (
+            <div className="evolution-detail-panel" role="region" aria-label="Dettagli del metodo evolutivo">
+              <div className="evolution-detail-heading">
+                <h3>{selectedEvolution.from} → {selectedEvolution.to}</h3>
+                <button type="button" onClick={() => setSelectedEvolution(null)} aria-label="Chiudi dettagli evoluzione">Chiudi ×</button>
+              </div>
+              {selectedEvolution.methods.length ? (
+                <ul>
+                  {selectedEvolution.methods.map((method) => <li key={method}>{method}</li>)}
+                </ul>
+              ) : (
+                <p>PokéAPI non indica le condizioni per questo passaggio evolutivo.</p>
+              )}
+              {selectedEvolution.methods.length > 1 && (
+                <small>I metodi alternativi possono dipendere dal gioco.</small>
+              )}
+            </div>
+          )}
           <p className="evolution-note">
             Le condizioni riportano i dati di PokéAPI e possono cambiare da un gioco all'altro.
             La presenza nella catena non garantisce l'ottenibilità nel gioco selezionato.

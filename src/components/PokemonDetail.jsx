@@ -7,6 +7,7 @@ import {
 import { pokemonTypes } from '../lib/types.js'
 import BaseStats from './BaseStats.jsx'
 import EvolutionChain from './EvolutionChain.jsx'
+import FormSelector from './FormSelector.jsx'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -172,7 +173,9 @@ export default function PokemonDetail({ pokemon, catalog }) {
                   <p>Immagine {shiny ? 'shiny ' : ''}non disponibile per questa forma.</p>
                 )}
               </div>
-              <div className="pokemon-detail-variants" role="group" aria-label="Colorazione del Pokémon">
+              <div className="pokemon-detail-image-controls">
+                <FormSelector pokemon={pokemon} catalog={catalog} />
+                <div className="pokemon-detail-variants" role="group" aria-label="Colorazione del Pokémon">
                 <button
                   type="button"
                   className={!shiny ? 'selected' : ''}
@@ -191,6 +194,7 @@ export default function PokemonDetail({ pokemon, catalog }) {
                 >
                   ✨ Shiny
                 </button>
+                </div>
               </div>
             </div>
 

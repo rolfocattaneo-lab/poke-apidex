@@ -9,6 +9,7 @@ import BaseStats from './BaseStats.jsx'
 import EvolutionChain from './EvolutionChain.jsx'
 import FormSelector from './FormSelector.jsx'
 import HistoricalSpriteSelector from './HistoricalSpriteSelector.jsx'
+import TypeEffectiveness from './TypeEffectiveness.jsx'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -230,6 +231,8 @@ export default function PokemonDetail({ pokemon, catalog }) {
               </div>
             </div>
           </div>
+
+          <TypeEffectiveness key={types.join('/')} types={types} />
 
           <HistoricalSpriteSelector
             details={details}

@@ -425,19 +425,34 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
    non una colonna verticale di schede o descrizioni molto lunghe. */
 .evolution-branch-split {
   display: grid;
-  grid-template-columns: 154px minmax(0, 1fr);
+  grid-template-columns: 154px minmax(0, 752px);
   align-items: center;
-  column-gap: 18px;
+  justify-content: center;
+  column-gap: 38px;
   width: 100%;
 }
 .evolution-branch-split > .evolution-species { justify-self: center; }
 .evolution-children-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 11px;
+  position: relative;
+  grid-template-columns: repeat(var(--evolution-columns, 4), minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 20px 16px;
   width: 100%;
   min-width: 0;
+  margin: 0 auto;
+}
+.evolution-branch-split > .evolution-children-grid::before {
+  content: '→';
+  position: absolute;
+  top: 50%;
+  left: -31px;
+  transform: translateY(-50%);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
 }
 .evolution-child-tile {
   box-sizing: border-box;
@@ -446,10 +461,10 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 10px 8px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--page);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .evolution-child-tile > .evolution-branch {
   order: 0;
@@ -471,7 +486,7 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   width: min(100%, 154px);
   min-width: 0;
   height: 160px;
-  background: var(--surface);
+  background: var(--page);
 }
 .evolution-child-tile .evolution-species-active { background: var(--accent-soft); }
 .evolution-child-tile .evolution-method-label { min-height: 2.8em; }
@@ -512,7 +527,8 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
 .evolution-detail-panel small { display: block; margin-top: 10px; color: var(--muted); font-size: 11px; }
 
 @media (max-width: 1050px) {
-  .evolution-children-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .evolution-branch-split { grid-template-columns: 154px minmax(0, 560px); }
+  .evolution-children-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   .pokemon-detail-evolutions { padding: 22px; margin-top: 14px; }
@@ -521,9 +537,14 @@ a.evolution-species:focus-visible { outline: 3px solid var(--accent); outline-of
   .evolution-branch:not(.evolution-branch-split) { flex-direction: row; width: max-content; }
   .evolution-child:not(.evolution-child-tile) { flex-direction: row; width: auto; }
   .evolution-children:not(.evolution-children-grid) { flex-direction: row; width: max-content; }
-  .evolution-branch-split { display: flex; flex-direction: column; align-items: center; gap: 13px; }
+  .evolution-branch-split { display: flex; flex-direction: column; align-items: center; gap: 33px; }
+  .evolution-branch-split > .evolution-children-grid::before {
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+  }
   .evolution-children-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .evolution-child-tile { padding: 9px 6px; }
+  .evolution-child-tile { padding: 0; }
   .evolution-child-tile > .evolution-branch { flex-direction: column; width: 100%; }
   .evolution-child-tile .evolution-species { width: min(100%, 154px); }
   .evolution-child-tile .evolution-children:not(.evolution-children-grid),

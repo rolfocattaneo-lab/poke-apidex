@@ -10,6 +10,7 @@ import EvolutionChain from './EvolutionChain.jsx'
 import FormSelector from './FormSelector.jsx'
 import HistoricalSpriteSelector from './HistoricalSpriteSelector.jsx'
 import TypeEffectiveness from './TypeEffectiveness.jsx'
+import PokemonAbilities from './PokemonAbilities.jsx'
 
 const typeLabels = Object.fromEntries(pokemonTypes.map(({ id, label }) => [id, label]))
 
@@ -213,14 +214,7 @@ export default function PokemonDetail({ pokemon, catalog }) {
               <div className="pokemon-detail-abilities">
                 <h3>Abilità</h3>
                 {abilities.length > 0 ? (
-                  <div className="pokemon-detail-ability-list">
-                    {abilities.map(({ ability, is_hidden: hidden }) => (
-                      <span className="pokemon-detail-ability" key={ability.name}>
-                        <strong>{abilityNames[ability.name] || titleCase(ability.name)}</strong>
-                        {hidden && <small>Nascosta</small>}
-                      </span>
-                    ))}
-                  </div>
+                  <PokemonAbilities abilities={abilities} abilityNames={abilityNames} />
                 ) : (
                   <p className="pokemon-detail-unavailable">Abilità non disponibili per questa forma.</p>
                 )}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import PokemonCard from './components/PokemonCard.jsx'
 import PokemonDetail from './components/PokemonDetail.jsx'
 import { getNationalCatalog } from './lib/pokeapi.js'
@@ -45,6 +45,12 @@ function App() {
   const [catalogError, setCatalogError] = useState('')
   const [catalogRetry, setCatalogRetry] = useState(0)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  // Il catalogo resta montato mentre si visita una scheda: ricordiamo anche
+  // dove si trovava lo scroll prima di nasconderlo.
+  const catalogScrollRef = useRef(0)
+  const previousDetailKeyRef = useRef(null)
+  const catalogMainRef = useRef(null)
+  const detailMainRef = useRef(null)
   const regional = useRegionalPokedex()
 
   useEffect(() => {
@@ -134,6 +140,31 @@ function App() {
     ? regionalCatalog.find((entry) => entry.key === detailKey)
       || catalog.find((entry) => entry.key === detailKey)
     : null
+
+  // Il cambio hash non è un caricamento di pagina: il browser conserva lo
+  // scroll. Spostiamolo prima del paint, anche passando da una forma all'altra.
+  useLayoutEffect(() => {
+    const previous = previousDetailKeyRef.current
+    if (previous === detailKey) return
+
+    if (detailKey) {
+      detailMainRef.current?.focus({ preventScroll: true })
+      window.scrollTo(0, 0)
+    } else {
+      catalogMainRef.current?.focus({ preventScroll: true })
+      window.scrollTo(0, catalogScrollRef.current)
+    }
+
+    previousDetailKeyRef.current = detailKey
+  }, [detailKey])
+
+  function rememberCatalogPosition(event) {
+    // Il click (anche da tastiera) precede il cambio hash: qui lo scroll
+    // del catalogo è ancora quello effettivo, non quello della nuova pagina.
+    if (event.target instanceof Element && event.target.closest('a.pokemon-card')) {
+      catalogScrollRef.current = window.scrollY
+    }
+  }
 
   const matchingPokemon = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -301,7 +332,12 @@ function App() {
           <div className="sidebar-note"><span className="note-dot" /> Nei Pokédex regionali le forme condividono il numero della specie. La presenza di una forma qui non ne garantisce la disponibilità nel gioco scelto.</div>
         </aside>
 
-        <main className={'main-content' + (detailKey ? ' detail-hidden' : '')}>
+        <main
+          ref={catalogMainRef}
+          tabIndex={-1}
+          onClickCapture={rememberCatalogPosition}
+          className={'main-content' + (detailKey ? ' detail-hidden' : '')}
+        >
           <div className="intro">
             <span className="eyebrow intro-eyebrow">POKÉDEX • {regional.region === 'national' ? 'NAZIONALE' : regionLabel(regional.region).toUpperCase()}</span>
             <h1>Ogni Pokémon.<br /><span>Una storia da scoprire.</span></h1>
@@ -381,7 +417,7 @@ function App() {
           <footer className="site-footer">Poke Apidex è un progetto indipendente e non ufficiale. Pokémon e relativi marchi appartengono ai rispettivi titolari.</footer>
         </main>
         {detailKey && (
-          <main className="main-content pokemon-detail-main">
+          <main ref={detailMainRef} tabIndex={-1} className="main-content pokemon-detail-main">
             {catalogLoading ? (
               <div className="catalog-feedback" role="status">Caricamento catalogo Pokémon…</div>
             ) : catalogError ? (

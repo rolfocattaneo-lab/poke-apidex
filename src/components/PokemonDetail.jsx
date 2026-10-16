@@ -173,7 +173,9 @@ export default function PokemonDetail({ pokemon, catalog }) {
                   <p>Immagine {shiny ? 'shiny ' : ''}non disponibile per questa forma.</p>
                 )}
               </div>
-              <div className="pokemon-detail-variants" role="group" aria-label="Colorazione del Pokémon">
+              <div className="pokemon-detail-image-controls">
+                <FormSelector pokemon={pokemon} catalog={catalog} />
+                <div className="pokemon-detail-variants" role="group" aria-label="Colorazione del Pokémon">
                 <button
                   type="button"
                   className={!shiny ? 'selected' : ''}
@@ -192,6 +194,7 @@ export default function PokemonDetail({ pokemon, catalog }) {
                 >
                   ✨ Shiny
                 </button>
+                </div>
               </div>
             </div>
 
@@ -237,8 +240,6 @@ export default function PokemonDetail({ pokemon, catalog }) {
               </div>
             </div>
           </div>
-
-          <FormSelector pokemon={pokemon} catalog={catalog} />
 
           <section className="pokemon-detail-description">
             <span className="eyebrow">POKÉDEX</span>

@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import {
   cleanFlavorText,
   getHistoricalSpriteOptions,
-  getLatestItalianFlavor,
+  getLatestAvailableFlavor,
   getVersionFlavor,
 } from '../lib/historicalSprites.js'
 
@@ -26,7 +26,7 @@ function PokedexDescription({ species, speciesError, flavor, versionLabel, categ
       ) : (
         <p className="pokemon-detail-unavailable">
           {fallback
-            ? 'Descrizione non disponibile in italiano per questa specie.'
+            ? 'Descrizione non disponibile in italiano o inglese per questa specie.'
             : 'PokéAPI non riporta una descrizione italiana o inglese per ' + versionLabel + '.'}
         </p>
       )}
@@ -56,7 +56,7 @@ export default function HistoricalSpriteSelector({
       <PokedexDescription
         species={species}
         speciesError={speciesError}
-        flavor={getLatestItalianFlavor(species)}
+        flavor={getLatestAvailableFlavor(species)}
         category={category}
         fallback
       />

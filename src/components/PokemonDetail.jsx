@@ -57,16 +57,6 @@ function getSpriteOptions(details, source, shiny) {
   return [...new Set(options.filter(Boolean))]
 }
 
-function getItalianFlavor(species) {
-  if (!species) return null
-  const entries = species.flavor_text_entries || []
-  return entries.filter((entry) => entry.language?.name === 'it').at(-1) || null
-}
-
-function cleanFlavorText(value) {
-  return value.replace(/[\f\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim()
-}
-
 export default function PokemonDetail({ pokemon, catalog }) {
   const [details, setDetails] = useState(null)
   const [error, setError] = useState('')
@@ -130,7 +120,6 @@ export default function PokemonDetail({ pokemon, catalog }) {
   const shinyImages = getSpriteOptions(details, pokemon.source, true)
   const imageOptions = shiny ? shinyImages : normalImages
   const image = imageOptions[imageIndex]
-  const flavor = getItalianFlavor(species)
   const abilities = details?.abilities || []
 
   function chooseShiny(nextShiny) {
@@ -242,31 +231,14 @@ export default function PokemonDetail({ pokemon, catalog }) {
             </div>
           </div>
 
-          <section className="pokemon-detail-description">
-            <span className="eyebrow">POKÉDEX</span>
-            <h2>Descrizione della specie</h2>
-            {speciesError ? (
-              <p className="pokemon-detail-unavailable">Impossibile caricare la descrizione da PokéAPI.</p>
-            ) : !species ? (
-              <p className="pokemon-detail-unavailable">Caricamento descrizione…</p>
-            ) : flavor ? (
-              <>
-                <p>{cleanFlavorText(flavor.flavor_text)}</p>
-                {flavor.version?.name && (
-                  <small>Testo presente in PokéAPI per il gioco: {titleCase(flavor.version.name)}</small>
-                )}
-              </>
-            ) : (
-              <p className="pokemon-detail-unavailable">Descrizione in italiano non disponibile per questa specie.</p>
-            )}
-            {pokemon.category !== 'base' && (
-              <p className="pokemon-detail-species-note">
-                La descrizione si riferisce alla specie e non necessariamente a questa forma.
-              </p>
-            )}
-          </section>
-
-          <HistoricalSpriteSelector details={details} title={title} />
+          <HistoricalSpriteSelector
+            details={details}
+            species={species}
+            speciesError={speciesError}
+            title={title}
+            category={pokemon.category}
+            primaryType={primaryType}
+          />
 
           <EvolutionChain
             species={species}

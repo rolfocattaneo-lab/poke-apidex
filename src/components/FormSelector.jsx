@@ -37,7 +37,7 @@ export default function FormSelector({ pokemon, catalog }) {
   function changeForm(key) {
     const next = forms.find((entry) => entry.key === key)
     if (next && next.key !== pokemon.key) {
-      window.location.hash = '#/pokemon/' + next.source + '/' + next.id
+      window.location.assign('#/pokemon/' + next.source + '/' + next.id)
     }
   }
 

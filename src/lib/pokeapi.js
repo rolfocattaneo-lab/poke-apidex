@@ -4,6 +4,8 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000
 
 const detailsCache = new Map()
 const formCache = new Map()
+const speciesCache = new Map()
+const abilityCache = new Map()
 
 function getResourceId(url) {
   const match = url.match(/\/(\d+)\/?$/)
@@ -159,6 +161,14 @@ export function getPokemonDetails(id) {
   return getCachedDetails(detailsCache, 'pokemon', id)
 }
 
+export function getPokemonSpeciesDetails(speciesId) {
+  return getCachedDetails(speciesCache, 'pokemon-species', speciesId)
+}
+
+export function getAbilityDetails(abilityName) {
+  return getCachedDetails(abilityCache, 'ability', abilityName)
+}
+
 export function getPokemonEntryDetails(entry) {
   if (entry.source !== 'form') return getPokemonDetails(entry.id)
 
@@ -173,6 +183,7 @@ export function getPokemonEntryDetails(entry) {
         ...form,
         types: form.types?.length ? form.types : parent.types,
         stats: parent.stats,
+        abilities: parent.abilities,
       }
     })
 }
